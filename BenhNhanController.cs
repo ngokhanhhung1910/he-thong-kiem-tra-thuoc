@@ -39,12 +39,13 @@ namespace MediCheck.Api.Controllers
         };
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? search)
+        public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? q)
         {
+            var keyword = !string.IsNullOrWhiteSpace(q) ? q : search;
             var query = _context.BenhNhans.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(b => b.HoTen.Contains(search) || b.MaBenhNhan.Contains(search));
+            if (!string.IsNullOrWhiteSpace(keyword))
+                query = query.Where(b => b.HoTen.Contains(keyword) || b.MaBenhNhan.Contains(keyword));
 
             var items = await query.OrderByDescending(b => b.Id).ToListAsync();
             return Ok(items.Select(ToDto));
