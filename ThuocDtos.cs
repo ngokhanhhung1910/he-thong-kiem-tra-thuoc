@@ -10,6 +10,7 @@ namespace MediCheck.Api.DTOs
         public int TuoiApDungDen { get; set; }
         public string LieuLuongKhuyenNghi { get; set; } = string.Empty;
         public string? GhiChuChongChiDinh { get; set; }
+        public int? NhomThuocId { get; set; }
     }
 
     public class ThuocUpdateDto : ThuocCreateDto
@@ -30,6 +31,8 @@ namespace MediCheck.Api.DTOs
         public string LieuLuongKhuyenNghi { get; set; } = string.Empty;
         public string? GhiChuChongChiDinh { get; set; }
         public bool DangSuDung { get; set; }
+        public int? NhomThuocId { get; set; }
+        public string? TenNhomThuoc { get; set; }
     }
 
     public class ThuocStatsDto

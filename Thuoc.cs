@@ -45,5 +45,8 @@ namespace MediCheck.Api.Models
         public bool DangSuDung { get; set; } = true;
 
         public DateTime NgayTao { get; set; } = DateTime.Now;
+
+        public int? NhomThuocId { get; set; }
+        public NhomThuoc? NhomThuoc { get; set; }
     }
 }

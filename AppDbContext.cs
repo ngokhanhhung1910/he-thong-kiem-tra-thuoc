@@ -9,11 +9,12 @@ namespace MediCheck.Api.Data
 
         public DbSet<NguoiDung> NguoiDungs => Set<NguoiDung>();
         public DbSet<Thuoc> Thuocs => Set<Thuoc>();
+        public DbSet<NhomThuoc> NhomThuocs => Set<NhomThuoc>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
 
-   
+    
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,14 @@ namespace MediCheck.Api.Data
             modelBuilder.Entity<Thuoc>()
                 .HasIndex(t => t.MaThuoc)
                 .IsUnique();
+
+            modelBuilder.Entity<NhomThuoc>().HasData(
+                new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },
+                new NhomThuoc { Id = 2, TenNhomThuoc = "Kháng sinh" },
+                new NhomThuoc { Id = 3, TenNhomThuoc = "Kháng viêm" },
+                new NhomThuoc { Id = 4, TenNhomThuoc = "Dị ứng - Kháng Histamin" },
+                new NhomThuoc { Id = 5, TenNhomThuoc = "Tiêu hoá" }
+            );
 
             modelBuilder.Entity<VaiTroQuyen>()
                 .HasKey(vq => new { vq.VaiTroId, vq.QuyenId });
@@ -55,16 +64,13 @@ namespace MediCheck.Api.Data
             );
 
             modelBuilder.Entity<VaiTroQuyen>().HasData(
-                // Admin: full quyền
                 new VaiTroQuyen { VaiTroId = 1, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 1, QuyenId = 2 },
                 new VaiTroQuyen { VaiTroId = 1, QuyenId = 3 }, new VaiTroQuyen { VaiTroId = 1, QuyenId = 4 },
                 new VaiTroQuyen { VaiTroId = 1, QuyenId = 5 }, new VaiTroQuyen { VaiTroId = 1, QuyenId = 6 },
                 new VaiTroQuyen { VaiTroId = 1, QuyenId = 7 },
-                // BacSi: xem thuốc, kiểm tra, xem+quản lý bệnh nhân, xem báo cáo
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 2, QuyenId = 3 },
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 4 }, new VaiTroQuyen { VaiTroId = 2, QuyenId = 5 },
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 7 },
-                // DuocSi: quản lý thuốc, kiểm tra, xem bệnh nhân
                 new VaiTroQuyen { VaiTroId = 3, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 2 },
                 new VaiTroQuyen { VaiTroId = 3, QuyenId = 3 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 4 }
             );

@@ -10,7 +10,7 @@ namespace MediCheck.Api.Controllers
 {
     [ApiController]
     [Route("api/thuoc")]
-    [Authorize]     public class ThuocController : ControllerBase
+    public class ThuocController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -22,15 +22,19 @@ namespace MediCheck.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
+            [FromQuery] int? category, // NhomThuocId
             [FromQuery] string? dangBaoChe,
-            [FromQuery] string? trangThai, 
+            [FromQuery] string? trangThai,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 5)
         {
-            var query = _context.Thuocs.AsQueryable();
+            var query = _context.Thuocs.Include(t => t.NhomThuoc).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(t => t.TenThuoc.Contains(search) || t.HoatChatChinh.Contains(search));
+
+            if (category.HasValue)
+                query = query.Where(t => t.NhomThuocId == category.Value);
 
             if (!string.IsNullOrWhiteSpace(dangBaoChe) && dangBaoChe != "Tất cả")
                 query = query.Where(t => t.DangBaoChe == dangBaoChe);
@@ -58,11 +62,20 @@ namespace MediCheck.Api.Controllers
                     TuoiApDungDen = t.TuoiApDungDen,
                     LieuLuongKhuyenNghi = t.LieuLuongKhuyenNghi,
                     GhiChuChongChiDinh = t.GhiChuChongChiDinh,
-                    DangSuDung = t.DangSuDung
+                    DangSuDung = t.DangSuDung,
+                    NhomThuocId = t.NhomThuocId,
+                    TenNhomThuoc = t.NhomThuoc != null ? t.NhomThuoc.TenNhomThuoc : null
                 })
                 .ToListAsync();
 
             return Ok(new { total, page, pageSize, items });
+        }
+
+        [HttpGet("nhom-thuoc")]
+        public async Task<IActionResult> GetNhomThuoc()
+        {
+            var nhomThuocs = await _context.NhomThuocs.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            return Ok(nhomThuocs);
         }
 
         [HttpGet("stats")]
@@ -89,7 +102,6 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
-        
         [HttpPost]
         [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Create([FromBody] ThuocCreateDto dto)
@@ -111,6 +123,7 @@ namespace MediCheck.Api.Controllers
                 TuoiApDungDen = dto.TuoiApDungDen,
                 LieuLuongKhuyenNghi = dto.LieuLuongKhuyenNghi,
                 GhiChuChongChiDinh = dto.GhiChuChongChiDinh,
+                NhomThuocId = dto.NhomThuocId,
                 DangSuDung = true
             };
 
@@ -138,6 +151,7 @@ namespace MediCheck.Api.Controllers
             thuoc.TuoiApDungDen = dto.TuoiApDungDen;
             thuoc.LieuLuongKhuyenNghi = dto.LieuLuongKhuyenNghi;
             thuoc.GhiChuChongChiDinh = dto.GhiChuChongChiDinh;
+            thuoc.NhomThuocId = dto.NhomThuocId;
             thuoc.DangSuDung = dto.DangSuDung;
 
             await _context.SaveChangesAsync();
