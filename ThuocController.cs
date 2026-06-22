@@ -22,7 +22,7 @@ namespace MediCheck.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
-            [FromQuery] int? category, // NhomThuocId
+            [FromQuery] int? category, 
             [FromQuery] string? dangBaoChe,
             [FromQuery] string? trangThai,
             [FromQuery] int page = 1,
