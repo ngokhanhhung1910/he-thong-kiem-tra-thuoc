@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>MediCheck - Hồ sơ bệnh nhân</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#f4f6fa; color:#1f2533; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
+  .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
+  .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  .sb-logo .text-main { font-size:15px; font-weight:600; }
+  .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
+  .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; }
+  .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+
+  .main { flex:1; display:flex; flex-direction:column; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; }
+  .topbar b { color:#2f6fed; }
+  .content { padding:26px 28px; }
+  .page-header h1 { font-size:24px; font-weight:600; }
+  .page-header p { font-size:13px; color:#8a93a6; margin-top:4px; margin-bottom:20px; }
+
+  .grid { display:grid; grid-template-columns:300px 1fr; gap:18px; }
+
+  .panel { background:#fff; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.05); padding:16px; }
+  .search-input { width:100%; padding:11px 14px; border:1px solid #e1e4ea; border-radius:8px; font-size:13px; margin-bottom:14px; }
+
+  table.patient-list { width:100%; border-collapse:collapse; }
+  table.patient-list th { text-align:left; font-size:11px; color:#8a93a6; padding:8px; border-bottom:1px solid #eef0f5; }
+  table.patient-list td { padding:10px 8px; font-size:13px; border-bottom:1px solid #f3f4f8; cursor:pointer; }
+  table.patient-list tr:hover td { background:#f7f9ff; }
+  table.patient-list tr.active td { background:#e8efff; }
+
+  .detail-title { font-size:15px; font-weight:700; margin-bottom:10px; }
+  .detail-line { font-size:13px; color:#4a5266; margin-bottom:6px; }
+  .detail-line b { color:#1f2533; }
+
+  .timeline-title { font-size:14px; font-weight:600; margin:16px 0 10px; }
+  .timeline-item { border-left:2px solid #e1e4ea; padding:8px 14px; margin-bottom:6px; font-size:13px; }
+  .badge-ok { color:#1e9e53; font-weight:600; }
+  .badge-warn { color:#e08a1f; font-weight:600; }
+  .empty-state { color:#8a93a6; font-size:13px; text-align:center; padding:40px 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="circle">M</div>
+      <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
+    </div>
+    <div class="sb-group-title">TỔNG QUAN</div>
+    <div class="sb-item">📊 Tổng quan</div>
+    <div class="sb-group-title">NGHIỆP VỤ</div>
+    <div class="sb-item">💊 Danh mục thuốc</div>
+    <div class="sb-item">✅ Kiểm tra thuốc theo độ tuổi</div>
+    <div class="sb-item active">👥 Hồ sơ bệnh nhân</div>
+    <div class="sb-group-title">QUẢN TRỊ</div>
+    <div class="sb-item">🛡 Tài khoản người dùng</div>
+    <div class="sb-item">🔑 Phân quyền</div>
+    <div class="sb-item">📈 Báo cáo & thống kê</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">MediCheck / <b>Hồ sơ bệnh nhân</b></div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Quản lý hồ sơ bệnh nhân</h1>
+        <p>Nơi tìm kiếm thông tin bệnh nhân</p>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <input type="text" class="search-input" id="searchInput" placeholder="Nhập tên bệnh nhân hoặc mã BN...">
+          <table class="patient-list">
+            <thead><tr><th>Mã BN</th><th>Họ và tên</th><th>Tuổi</th></tr></thead>
+            <tbody id="patientListBody"></tbody>
+          </table>
+        </div>
+
+        <div class="panel" id="detailPanel">
+          <div class="empty-state">Chọn một bệnh nhân ở danh sách bên trái để xem chi tiết</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:5000/api/benhnhan";
+let selectedId = null;
+let searchTimer = null;
+
+async function loadPatientList() {
+  const q = document.getElementById('searchInput').value;
+  const res = await fetch(`${API_BASE}?q=${encodeURIComponent(q)}`);
+  const list = await res.json();
+
+  const tbody = document.getElementById('patientListBody');
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#8a93a6;">Không tìm thấy</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(p => `
+    <tr class="${p.id === selectedId ? 'active' : ''}" onclick="selectPatient(${p.id})">
+      <td>${p.maBenhNhan}</td><td>${p.hoTen}</td><td>${p.tuoi}</td>
+    </tr>
+  `).join('');
+}
+
+async function selectPatient(id) {
+  selectedId = id;
+  loadPatientList();
+
+  const res = await fetch(`${API_BASE}/${id}`);
+  const p = await res.json();
+
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-title">CHI TIẾT HỒ SƠ: ${p.hoTen}</div>
+    <div class="detail-line"><b>Mã BN:</b> ${p.maBenhNhan}</div>
+    <div class="detail-line"><b>Tuổi:</b> ${p.tuoi} tuổi | <b>Giới tính:</b> ${p.gioiTinh}</div>
+    <div class="detail-line"><b>CCCD:</b> ${p.cccd || 'Chưa cập nhật'}</div>
+    <div class="detail-line"><b>Tiền sử bệnh:</b> ${p.tienSuBenh || 'Không có'}</div>
+    <div class="timeline-title">LỊCH SỬ KÊ ĐƠN & KIỂM TRA THUỐC</div>
+    <div class="empty-state" style="padding:16px 0;">Chưa có lịch sử kê đơn cho bệnh nhân này</div>
+  `;
+}
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadPatientList, 350);
+});
+
+loadPatientList();
+</script>
+</body>
+</html>
