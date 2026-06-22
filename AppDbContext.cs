@@ -10,6 +10,7 @@ namespace MediCheck.Api.Data
         public DbSet<NguoiDung> NguoiDungs => Set<NguoiDung>();
         public DbSet<Thuoc> Thuocs => Set<Thuoc>();
         public DbSet<NhomThuoc> NhomThuocs => Set<NhomThuoc>();
+        public DbSet<GioiHanTuoiThuoc> GioiHanTuoiThuocs => Set<GioiHanTuoiThuoc>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
@@ -25,6 +26,11 @@ namespace MediCheck.Api.Data
             modelBuilder.Entity<Thuoc>()
                 .HasIndex(t => t.MaThuoc)
                 .IsUnique();
+
+            modelBuilder.Entity<GioiHanTuoiThuoc>()
+                .HasOne(g => g.Thuoc)
+                .WithMany()
+                .HasForeignKey(g => g.ThuocId);
 
             modelBuilder.Entity<NhomThuoc>().HasData(
                 new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },
