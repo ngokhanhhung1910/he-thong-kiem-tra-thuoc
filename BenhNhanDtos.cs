@@ -6,7 +6,7 @@ namespace MediCheck.Api.DTOs
         public DateTime NgaySinh { get; set; }
         public string GioiTinh { get; set; } = "Nam";
         public string? CCCD { get; set; }
-        public string? TienSuBenh { get; set; }
+        public string? TiensuBenh { get; set; }
     }
 
     public class BenhNhanUpdateDto : BenhNhanCreateDto
