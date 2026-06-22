@@ -11,11 +11,12 @@ namespace MediCheck.Api.Data
         public DbSet<Thuoc> Thuocs => Set<Thuoc>();
         public DbSet<NhomThuoc> NhomThuocs => Set<NhomThuoc>();
         public DbSet<GioiHanTuoiThuoc> GioiHanTuoiThuocs => Set<GioiHanTuoiThuoc>();
+        public DbSet<LieuLuongTheoNhomTuoi> LieuLuongTheoNhomTuois => Set<LieuLuongTheoNhomTuoi>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
 
-    
+      
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,11 @@ namespace MediCheck.Api.Data
                 .HasOne(g => g.Thuoc)
                 .WithMany()
                 .HasForeignKey(g => g.ThuocId);
+
+            modelBuilder.Entity<LieuLuongTheoNhomTuoi>()
+                .HasOne(l => l.Thuoc)
+                .WithMany()
+                .HasForeignKey(l => l.ThuocId);
 
             modelBuilder.Entity<NhomThuoc>().HasData(
                 new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },
@@ -77,7 +83,7 @@ namespace MediCheck.Api.Data
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 2, QuyenId = 3 },
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 4 }, new VaiTroQuyen { VaiTroId = 2, QuyenId = 5 },
                 new VaiTroQuyen { VaiTroId = 2, QuyenId = 7 },
-                new VaiTroQuyen { VaiTroId = 3, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 2 },
+              new VaiTroQuyen { VaiTroId = 3, QuyenId = 1 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 2 },
                 new VaiTroQuyen { VaiTroId = 3, QuyenId = 3 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 4 }
             );
 
