@@ -80,5 +80,57 @@ namespace MediCheck.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("{id}/lieu-luong")]
+        public async Task<IActionResult> GetLieuLuongTheoNhomTuoi(int id)
+        {
+            var thuoc = await _context.Thuocs.FindAsync(id);
+            if (thuoc == null) return NotFound("Không tìm thấy thuốc.");
+
+            var danhSach = await _context.LieuLuongTheoNhomTuois
+                .Where(l => l.ThuocId == id)
+                .OrderBy(l => l.TuoiTu)
+                .Select(l => new LieuLuongDto
+                {
+                    Id = l.Id,
+                    TuoiTu = l.TuoiTu,
+                    TuoiDen = l.TuoiDen,
+                    LieuLuongKhuyenNghi = l.LieuLuongKhuyenNghi,
+                    GhiChu = l.GhiChu
+                })
+                .ToListAsync();
+
+            return Ok(danhSach);
+        }
+
+        [HttpGet("dosage")]
+        public async Task<IActionResult> GetDosageByAgeGroup([FromQuery] int medicine_id, [FromQuery] int age)
+        {
+            var thuoc = await _context.Thuocs.FindAsync(medicine_id);
+            if (thuoc == null) return NotFound("Không tìm thấy thuốc.");
+
+            var lieuLuong = await _context.LieuLuongTheoNhomTuois
+                .Where(l => l.ThuocId == medicine_id && age >= l.TuoiTu && age <= l.TuoiDen)
+                .FirstOrDefaultAsync();
+
+            if (lieuLuong == null)
+            {
+                return Ok(new LieuLuongDto
+                {
+                    TuoiTu = thuoc.TuoiApDungTu,
+                    TuoiDen = thuoc.TuoiApDungDen,
+                    LieuLuongKhuyenNghi = thuoc.LieuLuongKhuyenNghi,
+                    GhiChu = null
+                });
+            }
+
+            return Ok(new LieuLuongDto
+            {
+                Id = lieuLuong.Id,
+                TuoiTu = lieuLuong.TuoiTu,
+                TuoiDen = lieuLuong.TuoiDen,
+                LieuLuongKhuyenNghi = lieuLuong.LieuLuongKhuyenNghi,
+                GhiChu = lieuLuong.GhiChu
+            });
     }
 }
