@@ -1,14 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MediCheck.Api.Data;
 using MediCheck.Api.Models;
 using MediCheck.Api.DTOs;
+using MediCheck.Api.Authorization;
 
 namespace MediCheck.Api.Controllers
 {
     [ApiController]
     [Route("api/thuoc")]
-    public class ThuocController : ControllerBase
+    [Authorize]     public class ThuocController : ControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -17,7 +19,6 @@ namespace MediCheck.Api.Controllers
             _context = context;
         }
 
- 
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
@@ -88,7 +89,9 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
+        
         [HttpPost]
+        [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Create([FromBody] ThuocCreateDto dto)
         {
             if (dto.TuoiApDungTu > dto.TuoiApDungDen)
@@ -118,6 +121,7 @@ namespace MediCheck.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Update(int id, [FromBody] ThuocUpdateDto dto)
         {
             var thuoc = await _context.Thuocs.FindAsync(id);
@@ -152,6 +156,7 @@ namespace MediCheck.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Delete(int id)
         {
             var thuoc = await _context.Thuocs.FindAsync(id);
