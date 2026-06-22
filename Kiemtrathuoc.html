@@ -39,7 +39,9 @@
   .result-box { border-radius:10px; padding:18px 20px; margin-bottom:18px; display:none; }
   .result-box.an-toan { background:#e3f7ea; border:1px solid #b7e6c7; }
   .result-box.than-trong { background:#fff6e0; border:1px solid #f3dd9c; }
-  .result-box.nguy-hiem { background:#ffe7e7; border:1px solid #f3b3ac; }
+  .result-box.nguy-hiem { background:#ffe7e7; border:2px solid #e0432f; box-shadow:0 0 0 4px rgba(224,67,47,0.12); }
+  .result-box.nguy-hiem .result-title { color:#e0432f; font-size:16px; }
+  .result-box.nguy-hiem .result-detail { color:#b8281a; font-weight:600; }
   .result-title { font-weight:700; font-size:14px; margin-bottom:6px; }
   .result-detail { font-size:13px; line-height:1.6; }
 
@@ -174,7 +176,7 @@ function renderResult(data) {
     detail.textContent = '';
   } else {
     const mucDoText = data.mucDo === 'ThanTrong' ? 'THẬN TRỌNG' : 'NGUY HIỂM';
-    title.textContent = `⚠ CẢNH BÁO: THUỐC KHÔNG AN TOÀN CHO ĐỘ TUỔI NÀY`;
+    title.textContent = `🚨 CẢNH BÁO: THUỐC KHÔNG AN TOÀN CHO ĐỘ TUỔI NÀY`;
     detail.innerHTML = `Mức độ: [ ❌ ${mucDoText} ]<br>Lý do: ${data.lyDo || ''}`;
   }
 
