@@ -19,4 +19,13 @@ namespace MediCheck.Api.DTOs
         public string DoTuoiPhuHop { get; set; } = string.Empty;
         public List<ThuocPhuHopDto> ThuocThayThe { get; set; } = new();
     }
+
+    public class LieuLuongDto
+    {
+        public int Id { get; set; }
+        public int TuoiTu { get; set; }
+        public int TuoiDen { get; set; }
+        public string LieuLuongKhuyenNghi { get; set; } = string.Empty;
+        public string? GhiChu { get; set; }
+    }
 }
