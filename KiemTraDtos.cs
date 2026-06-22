@@ -28,4 +28,21 @@ namespace MediCheck.Api.DTOs
         public string LieuLuongKhuyenNghi { get; set; } = string.Empty;
         public string? GhiChu { get; set; }
     }
+
+    public class AgeRuleDto
+    {
+        public int Id { get; set; }
+        public int TuoiTu { get; set; }
+        public int TuoiDen { get; set; }
+        public string MucDo { get; set; } = string.Empty;
+        public string? LyDo { get; set; }
+    }
+
+    public class AgeRuleUpsertDto
+    {
+        public int TuoiTu { get; set; }
+        public int TuoiDen { get; set; }
+        public string MucDo { get; set; } = string.Empty;
+        public string? LyDo { get; set; }
+    }
 }

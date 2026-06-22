@@ -19,10 +19,11 @@ namespace MediCheck.Api.Controllers
             _context = context;
         }
 
+        // GET: api/thuoc?search=&category=&dangBaoChe=&trangThai=&page=1&pageSize=5
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
-            [FromQuery] int? category, 
+            [FromQuery] int? category, // NhomThuocId
             [FromQuery] string? dangBaoChe,
             [FromQuery] string? trangThai,
             [FromQuery] int page = 1,
@@ -71,6 +72,7 @@ namespace MediCheck.Api.Controllers
             return Ok(new { total, page, pageSize, items });
         }
 
+        // GET: api/thuoc/nhom-thuoc  (dùng cho dropdown lọc nhóm thuốc)
         [HttpGet("nhom-thuoc")]
         public async Task<IActionResult> GetNhomThuoc()
         {
@@ -78,6 +80,7 @@ namespace MediCheck.Api.Controllers
             return Ok(nhomThuocs);
         }
 
+        // GET: api/thuoc/stats  (4 ô thống kê ở Image 4)
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
@@ -94,6 +97,7 @@ namespace MediCheck.Api.Controllers
             return Ok(stats);
         }
 
+        // GET: api/thuoc/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -102,6 +106,7 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
+        // POST: api/thuoc
         [HttpPost]
         [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Create([FromBody] ThuocCreateDto dto)
@@ -133,6 +138,7 @@ namespace MediCheck.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = thuoc.Id }, thuoc);
         }
 
+        // PUT: api/thuoc/5
         [HttpPut("{id}")]
         [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Update(int id, [FromBody] ThuocUpdateDto dto)
@@ -158,6 +164,7 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
+        // PATCH: api/thuoc/5/toggle-status
         [HttpPatch("{id}/toggle-status")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
@@ -169,6 +176,7 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
+        // DELETE: api/thuoc/5
         [HttpDelete("{id}")]
         [RequirePermission("THUOC_QUANLY")]
         public async Task<IActionResult> Delete(int id)
@@ -179,6 +187,85 @@ namespace MediCheck.Api.Controllers
             _context.Thuocs.Remove(thuoc);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã xoá thuốc." });
+        }
+
+        [HttpGet("{id}/age-rules")]
+        public async Task<IActionResult> GetAgeRules(int id)
+        {
+            var thuoc = await _context.Thuocs.FindAsync(id);
+            if (thuoc == null) return NotFound("Không tìm thấy thuốc.");
+
+            var rules = await _context.GioiHanTuoiThuocs
+                .Where(g => g.ThuocId == id)
+                .OrderBy(g => g.TuoiTu)
+                .Select(g => new AgeRuleDto
+                {
+                    Id = g.Id,
+                    TuoiTu = g.TuoiTu,
+                    TuoiDen = g.TuoiDen,
+                    MucDo = g.MucDo.ToString(),
+                    LyDo = g.LyDo
+                })
+                .ToListAsync();
+
+            return Ok(rules);
+        }
+
+        [HttpPost("{id}/age-rules")]
+        [RequirePermission("THUOC_QUANLY")]
+        public async Task<IActionResult> CreateAgeRule(int id, [FromBody] AgeRuleUpsertDto dto)
+        {
+            var thuoc = await _context.Thuocs.FindAsync(id);
+            if (thuoc == null) return NotFound("Không tìm thấy thuốc.");
+
+            if (!Enum.TryParse<MucDoCanhBao>(dto.MucDo, true, out var mucDo))
+                return BadRequest("Mức độ không hợp lệ.");
+
+            var rule = new GioiHanTuoiThuoc
+            {
+                ThuocId = id,
+                TuoiTu = dto.TuoiTu,
+                TuoiDen = dto.TuoiDen,
+                MucDo = mucDo,
+                LyDo = dto.LyDo
+            };
+
+            _context.GioiHanTuoiThuocs.Add(rule);
+            await _context.SaveChangesAsync();
+            return Ok(rule);
+        }
+
+        [HttpPut("{id}/age-rules/{ruleId}")]
+        [RequirePermission("THUOC_QUANLY")]
+        public async Task<IActionResult> UpdateAgeRule(int id, int ruleId, [FromBody] AgeRuleUpsertDto dto)
+        {
+            var rule = await _context.GioiHanTuoiThuocs
+                .FirstOrDefaultAsync(g => g.Id == ruleId && g.ThuocId == id);
+            if (rule == null) return NotFound("Không tìm thấy quy tắc độ tuổi.");
+
+            if (!Enum.TryParse<MucDoCanhBao>(dto.MucDo, true, out var mucDo))
+                return BadRequest("Mức độ không hợp lệ.");
+
+            rule.TuoiTu = dto.TuoiTu;
+            rule.TuoiDen = dto.TuoiDen;
+            rule.MucDo = mucDo;
+            rule.LyDo = dto.LyDo;
+
+            await _context.SaveChangesAsync();
+            return Ok(rule);
+        }
+
+        [HttpDelete("{id}/age-rules/{ruleId}")]
+        [RequirePermission("THUOC_QUANLY")]
+        public async Task<IActionResult> DeleteAgeRule(int id, int ruleId)
+        {
+            var rule = await _context.GioiHanTuoiThuocs
+                .FirstOrDefaultAsync(g => g.Id == ruleId && g.ThuocId == id);
+            if (rule == null) return NotFound("Không tìm thấy quy tắc độ tuổi.");
+
+            _context.GioiHanTuoiThuocs.Remove(rule);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đã xoá quy tắc." });
         }
     }
 }

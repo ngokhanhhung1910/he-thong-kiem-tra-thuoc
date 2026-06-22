@@ -242,6 +242,43 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="ageRuleOverlay">
+  <div class="modal-box" style="width:560px;">
+    <h2 id="ageRuleTitle">Quy tắc độ tuổi</h2>
+    <div class="sub">Thiết lập độ tuổi cấm/cảnh báo cho thuốc</div>
+    <input type="hidden" id="ageRuleThuocId">
+
+    <table style="width:100%; border-collapse:collapse; margin-bottom:14px;">
+      <thead>
+        <tr style="font-size:12px; color:#6b7280; text-align:left;">
+          <th style="padding:6px;">Tuổi từ</th><th style="padding:6px;">Tuổi đến</th><th style="padding:6px;">Mức độ</th><th style="padding:6px;">Lý do</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="ageRuleTableBody"></tbody>
+    </table>
+
+    <div class="form-row-split">
+      <input type="number" id="newTuoiTu" placeholder="Từ">
+      <input type="number" id="newTuoiDen" placeholder="Đến">
+      <select id="newMucDo">
+        <option value="AnToan">An toàn</option>
+        <option value="ThanTrong">Thận trọng</option>
+        <option value="NguyHiem">Nguy hiểm</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <input type="text" id="newLyDo" placeholder="Lý do cảnh báo">
+    </div>
+    <div class="modal-actions" style="justify-content:flex-start;">
+      <button class="btn-save" onclick="addAgeRule()">+ Thêm quy tắc</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAgeRules()">Đóng</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_BASE = "http://localhost:5000/api/thuoc";
 let currentPage = 1;
@@ -298,6 +335,7 @@ async function loadTable() {
               ? `<span class="badge-active"><span class="dot dot-green"></span>Đang dùng</span>`
               : `<span class="badge-inactive"><span class="dot dot-red"></span>Ngừng dùng</span>`}</td>
         <td>
+          <button class="action-icon" onclick='openAgeRules(${t.id}, ${JSON.stringify(t.tenThuoc)})'>📋</button>
           <button class="action-icon" onclick='editThuoc(${JSON.stringify(t)})'>✏️</button>
           <button class="action-icon" onclick='openConfirmDelete(${t.id}, ${JSON.stringify(t.tenThuoc)})'>🗑️</button>
         </td>
@@ -400,6 +438,63 @@ async function confirmDeleteThuoc() {
 loadNhomThuoc();
 loadStats();
 loadTable();
+
+async function openAgeRules(thuocId, tenThuoc) {
+  document.getElementById('ageRuleThuocId').value = thuocId;
+  document.getElementById('ageRuleTitle').textContent = `Quy tắc độ tuổi - ${tenThuoc}`;
+  await loadAgeRules();
+  document.getElementById('ageRuleOverlay').classList.add('show');
+}
+
+function closeAgeRules() {
+  document.getElementById('ageRuleOverlay').classList.remove('show');
+}
+
+async function loadAgeRules() {
+  const thuocId = document.getElementById('ageRuleThuocId').value;
+  const res = await fetch(`${API_BASE}/${thuocId}/age-rules`);
+  const rules = await res.json();
+
+  const tbody = document.getElementById('ageRuleTableBody');
+  tbody.innerHTML = rules.map(r => `
+    <tr>
+      <td style="padding:6px;">${r.tuoiTu}</td>
+      <td style="padding:6px;">${r.tuoiDen}</td>
+      <td style="padding:6px;">${r.mucDo}</td>
+      <td style="padding:6px;">${r.lyDo || ''}</td>
+      <td style="padding:6px;"><button class="action-icon" onclick="deleteAgeRule(${r.id})">🗑️</button></td>
+    </tr>
+  `).join('');
+}
+
+async function addAgeRule() {
+  const thuocId = document.getElementById('ageRuleThuocId').value;
+  const payload = {
+    tuoiTu: parseInt(document.getElementById('newTuoiTu').value || 0),
+    tuoiDen: parseInt(document.getElementById('newTuoiDen').value || 0),
+    mucDo: document.getElementById('newMucDo').value,
+    lyDo: document.getElementById('newLyDo').value
+  };
+
+  const res = await fetch(`${API_BASE}/${thuocId}/age-rules`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) { alert(await res.text()); return; }
+
+  document.getElementById('newTuoiTu').value = '';
+  document.getElementById('newTuoiDen').value = '';
+  document.getElementById('newLyDo').value = '';
+  loadAgeRules();
+}
+
+async function deleteAgeRule(ruleId) {
+  const thuocId = document.getElementById('ageRuleThuocId').value;
+  await fetch(`${API_BASE}/${thuocId}/age-rules/${ruleId}`, { method: 'DELETE' });
+  loadAgeRules();
+}
 </script>
 </body>
 </html>
