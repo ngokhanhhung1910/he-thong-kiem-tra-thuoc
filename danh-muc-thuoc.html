@@ -81,6 +81,13 @@
   .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
   .btn-cancel { padding:11px 20px; border-radius:8px; border:1px solid #d8dbe3; background:#fff; cursor:pointer; font-size:13px; }
   .btn-save { padding:11px 20px; border-radius:8px; border:none; background:#2f6fed; color:#fff; cursor:pointer; font-size:13px; }
+
+  .confirm-box { width:380px; text-align:center; }
+  .confirm-icon { width:54px; height:54px; border-radius:50%; background:#ffe7e7; color:#e0432f; font-size:26px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+  .confirm-box h2 { font-size:17px; margin-bottom:8px; color:#1f2533; }
+  .confirm-box p { font-size:13px; color:#6b7280; margin-bottom:20px; }
+  .confirm-box .drug-name { font-weight:600; color:#1f2533; }
+  .btn-delete { padding:11px 20px; border-radius:8px; border:none; background:#e0432f; color:#fff; cursor:pointer; font-size:13px; }
 </style>
 </head>
 <body>
@@ -222,11 +229,25 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="confirmDeleteOverlay">
+  <div class="modal-box confirm-box">
+    <div class="confirm-icon">⚠</div>
+    <h2>Xác nhận xoá thuốc</h2>
+    <p>Bạn có chắc muốn xoá <span class="drug-name" id="confirmDeleteName"></span>? Hành động này không thể hoàn tác.</p>
+    <input type="hidden" id="confirmDeleteId">
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-cancel" onclick="closeConfirmDelete()">Huỷ</button>
+      <button class="btn-delete" onclick="confirmDeleteThuoc()">Xoá thuốc</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_BASE = "http://localhost:5000/api/thuoc";
 let currentPage = 1;
 const pageSize = 5;
 
+// SCRUM-57: Tải danh sách nhóm thuốc để đổ vào 2 dropdown (filter + modal)
 async function loadNhomThuoc() {
   const res = await fetch(`${API_BASE}/nhom-thuoc`);
   if (!res.ok) return;
@@ -278,7 +299,7 @@ async function loadTable() {
               : `<span class="badge-inactive"><span class="dot dot-red"></span>Ngừng dùng</span>`}</td>
         <td>
           <button class="action-icon" onclick='editThuoc(${JSON.stringify(t)})'>✏️</button>
-          <button class="action-icon" onclick="deleteThuoc(${t.id})">🗑️</button>
+          <button class="action-icon" onclick='openConfirmDelete(${t.id}, ${JSON.stringify(t.tenThuoc)})'>🗑️</button>
         </td>
       </tr>
     `).join('');
@@ -296,6 +317,7 @@ function renderPagination(total) {
 }
 function goPage(p) { currentPage = p; loadTable(); }
 
+// SCRUM-56: Tìm kiếm realtime có debounce (chờ người dùng ngừng gõ 350ms mới gọi API)
 let searchTimer = null;
 document.getElementById('searchInput').addEventListener('input', () => {
   clearTimeout(searchTimer);
@@ -357,9 +379,20 @@ async function saveThuoc() {
   loadTable();
 }
 
-async function deleteThuoc(id) {
-  if (!confirm('Bạn có chắc muốn xoá thuốc này?')) return;
+function openConfirmDelete(id, tenThuoc) {
+  document.getElementById('confirmDeleteId').value = id;
+  document.getElementById('confirmDeleteName').textContent = tenThuoc;
+  document.getElementById('confirmDeleteOverlay').classList.add('show');
+}
+
+function closeConfirmDelete() {
+  document.getElementById('confirmDeleteOverlay').classList.remove('show');
+}
+
+async function confirmDeleteThuoc() {
+  const id = document.getElementById('confirmDeleteId').value;
   await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+  closeConfirmDelete();
   loadStats();
   loadTable();
 }
