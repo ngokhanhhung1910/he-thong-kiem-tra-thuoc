@@ -190,7 +190,7 @@ function renderResult(data) {
   if (data.thuocThayThe && data.thuocThayThe.length > 0) {
     altBox.style.display = 'block';
     altBody.innerHTML = data.thuocThayThe.map(t => `
-      <tr><td>${t.tenThuoc}</td><td>${t.hoatChat}</td><td>${t.hamLuong}</td><td>${t.doTuoiPhuHop}</td></tr>
+      <tr><td>${t.tenThuoc}</td><td>${t.hoatChat}</td><td>${t.hamLuong}</td><td>${t.doTuoiphuHop}</td></tr>
     `).join('');
   } else {
     altBox.style.display = 'none';
