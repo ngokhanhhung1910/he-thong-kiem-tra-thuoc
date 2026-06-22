@@ -4,6 +4,7 @@ using MediCheck.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediCheck.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622090152_AddRolePermissionTables")]
+    partial class AddRolePermissionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,37 +24,6 @@ namespace MediCheck.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("MediCheck.Api.Models.GioiHanTuoiThuoc", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("LyDo")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("MucDo")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ThuocId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TuoiDen")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TuoiTu")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ThuocId");
-
-                    b.ToTable("GioiHanTuoiThuoc");
-                });
 
             modelBuilder.Entity("MediCheck.Api.Models.NguoiDung", b =>
                 {
@@ -96,55 +68,6 @@ namespace MediCheck.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("NguoiDung");
-                });
-
-            modelBuilder.Entity("MediCheck.Api.Models.NhomThuoc", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("MoTa")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("TenNhomThuoc")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("NhomThuoc");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            TenNhomThuoc = "Giảm đau - Hạ sốt"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            TenNhomThuoc = "Kháng sinh"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            TenNhomThuoc = "Kháng viêm"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            TenNhomThuoc = "Dị ứng - Kháng Histamin"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            TenNhomThuoc = "Tiêu hoá"
-                        });
                 });
 
             modelBuilder.Entity("MediCheck.Api.Models.QuyenEntity", b =>
@@ -269,9 +192,6 @@ namespace MediCheck.Api.Migrations
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("NhomThuocId")
-                        .HasColumnType("int");
-
                     b.Property<string>("TenThuoc")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -287,8 +207,6 @@ namespace MediCheck.Api.Migrations
 
                     b.HasIndex("MaThuoc")
                         .IsUnique();
-
-                    b.HasIndex("NhomThuocId");
 
                     b.ToTable("Thuoc");
                 });
@@ -430,26 +348,6 @@ namespace MediCheck.Api.Migrations
                             VaiTroId = 3,
                             QuyenId = 4
                         });
-                });
-
-            modelBuilder.Entity("MediCheck.Api.Models.GioiHanTuoiThuoc", b =>
-                {
-                    b.HasOne("MediCheck.Api.Models.Thuoc", "Thuoc")
-                        .WithMany()
-                        .HasForeignKey("ThuocId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Thuoc");
-                });
-
-            modelBuilder.Entity("MediCheck.Api.Models.Thuoc", b =>
-                {
-                    b.HasOne("MediCheck.Api.Models.NhomThuoc", "NhomThuoc")
-                        .WithMany()
-                        .HasForeignKey("NhomThuocId");
-
-                    b.Navigation("NhomThuoc");
                 });
 
             modelBuilder.Entity("MediCheck.Api.Models.VaiTroQuyen", b =>
