@@ -8,7 +8,7 @@
   body { background:#f4f6fa; color:#1f2533; }
   .layout { display:flex; min-height:100vh; }
 
-
+  /* SIDEBAR */
   .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
   .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
   .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
@@ -19,7 +19,7 @@
   .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
   .sb-item:hover:not(.active) { background:#1f3461; }
 
-
+  /* MAIN */
   .main { flex:1; display:flex; flex-direction:column; }
   .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; }
   .topbar b { color:#2f6fed; }
@@ -30,7 +30,7 @@
   .btn-add { background:#2f6fed; color:#fff; border:none; padding:11px 18px; border-radius:8px; font-size:14px; cursor:pointer; }
   .btn-add:hover { background:#255ed1; }
 
-
+  /* STAT CARDS */
   .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
   .stat-card { background:#fff; border-radius:10px; padding:16px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
   .stat-icon { width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
@@ -41,10 +41,12 @@
   .ic-orange { background:#fff2e0; color:#e08a1f; }
   .ic-red { background:#ffe7e7; color:#e0432f; }
 
+  /* FILTER BAR */
   .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
   .filter-bar input, .filter-bar select { padding:10px 14px; border:1px solid #e1e4ea; border-radius:8px; font-size:13px; background:#fff; }
   .filter-bar input { flex:1; min-width:200px; }
 
+  /* TABLE */
   table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
   th { text-align:left; font-size:12px; color:#8a93a6; padding:14px 16px; border-bottom:1px solid #eef0f5; }
   td { padding:14px 16px; font-size:13px; border-bottom:1px solid #f3f4f8; }
@@ -61,7 +63,7 @@
   .pagination span.page-num { padding:4px 9px; border-radius:6px; cursor:pointer; }
   .pagination span.page-num.active { background:#2f6fed; color:#fff; }
 
-
+  /* MODAL */
   .modal-overlay { position:fixed; inset:0; background:rgba(15,20,35,0.55); display:none; align-items:center; justify-content:center; z-index:100; }
   .modal-overlay.show { display:flex; }
   .modal-box { background:#eef0f5; border-radius:14px; padding:28px 32px; width:480px; max-height:88vh; overflow-y:auto; }
@@ -84,6 +86,7 @@
 <body>
 <div class="layout">
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-logo">
       <div class="circle">M</div>
@@ -100,6 +103,7 @@
     <div class="sb-item">📈 Báo cáo & thống kê</div>
   </div>
 
+  <!-- MAIN -->
   <div class="main">
     <div class="topbar">MediCheck / <b>Quản lý danh mục thuốc</b></div>
 
@@ -121,6 +125,9 @@
 
       <div class="filter-bar">
         <input type="text" id="searchInput" placeholder="Tìm theo tên thuốc, hoạt chất...">
+        <select id="filterNhomThuoc">
+          <option value="">Nhóm thuốc: Tất cả</option>
+        </select>
         <select id="filterDangBaoChe">
           <option value="Tất cả">Dạng bào chế: Tất cả</option>
           <option value="Viên nén">Viên nén</option>
@@ -136,10 +143,10 @@
 
       <table>
         <thead>
-          <tr><th>TÊN THUỐC</th><th>HOẠT CHẤT CHÍNH</th><th>DẠNG BÀO CHẾ</th><th>NHÓM TUỔI ÁP DỤNG</th><th>TRẠNG THÁI</th><th>HÀNH ĐỘNG</th></tr>
+          <tr><th>TÊN THUỐC</th><th>HOẠT CHẤT CHÍNH</th><th>NHÓM THUỐC</th><th>DẠNG BÀO CHẾ</th><th>NHÓM TUỔI ÁP DỤNG</th><th>TRẠNG THÁI</th><th>HÀNH ĐỘNG</th></tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="6" style="text-align:center;color:#8a93a6;">Đang tải dữ liệu...</td></tr>
+          <tr><td colspan="7" style="text-align:center;color:#8a93a6;">Đang tải dữ liệu...</td></tr>
         </tbody>
       </table>
       <div class="pagination" id="pagination"></div>
@@ -147,6 +154,7 @@
   </div>
 </div>
 
+<!-- MODAL THÊM/SỬA THUỐC -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <h2 id="modalTitle">Thêm Thuốc Mới</h2>
@@ -168,6 +176,13 @@
         <label>Hàm lượng <span class="req">*</span></label>
         <input type="text" id="hamLuong" placeholder="0 mg">
       </div>
+    </div>
+
+    <div class="form-row">
+      <label>Nhóm thuốc</label>
+      <select id="nhomThuocId">
+        <option value="">-- Chưa phân nhóm --</option>
+      </select>
     </div>
 
     <div class="form-row">
@@ -212,6 +227,22 @@ const API_BASE = "http://localhost:5000/api/thuoc";
 let currentPage = 1;
 const pageSize = 5;
 
+async function loadNhomThuoc() {
+  const res = await fetch(`${API_BASE}/nhom-thuoc`);
+  if (!res.ok) return;
+  const list = await res.json();
+
+  const filterSelect = document.getElementById('filterNhomThuoc');
+  list.forEach(n => {
+    filterSelect.innerHTML += `<option value="${n.id}">${n.tenNhomThuoc}</option>`;
+  });
+
+  const modalSelect = document.getElementById('nhomThuocId');
+  list.forEach(n => {
+    modalSelect.innerHTML += `<option value="${n.id}">${n.tenNhomThuoc}</option>`;
+  });
+}
+
 async function loadStats() {
   const res = await fetch(`${API_BASE}/stats`);
   const data = await res.json();
@@ -223,21 +254,23 @@ async function loadStats() {
 
 async function loadTable() {
   const search = document.getElementById('searchInput').value;
+  const category = document.getElementById('filterNhomThuoc').value;
   const dangBaoChe = document.getElementById('filterDangBaoChe').value;
   const trangThai = document.getElementById('filterTrangThai').value;
 
-  const params = new URLSearchParams({ search, dangBaoChe, trangThai, page: currentPage, pageSize });
+  const params = new URLSearchParams({ search, category, dangBaoChe, trangThai, page: currentPage, pageSize });
   const res = await fetch(`${API_BASE}?${params}`);
   const data = await res.json();
 
   const tbody = document.getElementById('tableBody');
   if (data.items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#8a93a6;">Không có dữ liệu</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#8a93a6;">Không có dữ liệu</td></tr>`;
   } else {
     tbody.innerHTML = data.items.map(t => `
       <tr>
         <td><b>${t.tenThuoc}</b><div class="drug-sub">Mã thuốc: ${t.maThuoc}</div></td>
         <td>${t.hoatChatChinh}</td>
+        <td>${t.tenNhomThuoc || '<span style="color:#aab">Chưa phân nhóm</span>'}</td>
         <td>${t.dangBaoChe}</td>
         <td><span class="badge badge-age">${t.tuoiApDungTu}-${t.tuoiApDungDen} tuổi</span></td>
         <td>${t.dangSuDung
@@ -263,14 +296,22 @@ function renderPagination(total) {
 }
 function goPage(p) { currentPage = p; loadTable(); }
 
-document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; loadTable(); });
+let searchTimer = null;
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentPage = 1;
+    loadTable();
+  }, 350);
+});
+document.getElementById('filterNhomThuoc').addEventListener('change', () => { currentPage = 1; loadTable(); });
 document.getElementById('filterDangBaoChe').addEventListener('change', () => { currentPage = 1; loadTable(); });
 document.getElementById('filterTrangThai').addEventListener('change', () => { currentPage = 1; loadTable(); });
 
 function openModal() {
   document.getElementById('modalTitle').textContent = 'Thêm Thuốc Mới';
   document.getElementById('editId').value = '';
-  ['tenThuoc','hoatChat','hamLuong','dangBaoChe','tuoiTu','tuoiDen','lieuLuong','ghiChu'].forEach(id => document.getElementById(id).value = '');
+  ['tenThuoc','hoatChat','hamLuong','dangBaoChe','tuoiTu','tuoiDen','lieuLuong','ghiChu','nhomThuocId'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('modalOverlay').classList.add('show');
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
@@ -286,6 +327,7 @@ function editThuoc(t) {
   document.getElementById('tuoiDen').value = t.tuoiApDungDen;
   document.getElementById('lieuLuong').value = t.lieuLuongKhuyenNghi;
   document.getElementById('ghiChu').value = t.ghiChuChongChiDinh || '';
+  document.getElementById('nhomThuocId').value = t.nhomThuocId || '';
   document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -300,6 +342,7 @@ async function saveThuoc() {
     tuoiApDungDen: parseInt(document.getElementById('tuoiDen').value || 0),
     lieuLuongKhuyenNghi: document.getElementById('lieuLuong').value,
     ghiChuChongChiDinh: document.getElementById('ghiChu').value,
+    nhomThuocId: document.getElementById('nhomThuocId').value ? parseInt(document.getElementById('nhomThuocId').value) : null,
     dangSuDung: true
   };
 
@@ -321,6 +364,7 @@ async function deleteThuoc(id) {
   loadTable();
 }
 
+loadNhomThuoc();
 loadStats();
 loadTable();
 </script>
