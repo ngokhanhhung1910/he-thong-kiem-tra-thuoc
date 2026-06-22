@@ -9,7 +9,6 @@ namespace MediCheck.Api.Data
 
         public DbSet<NguoiDung> NguoiDungs => Set<NguoiDung>();
         public DbSet<Thuoc> Thuocs => Set<Thuoc>();
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<NguoiDung>()

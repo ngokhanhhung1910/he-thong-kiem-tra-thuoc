@@ -17,12 +17,12 @@ namespace MediCheck.Api.Controllers
             _context = context;
         }
 
-        // GET: api/thuoc?search=&dangBaoChe=&trangThai=&page=1&pageSize=5
+ 
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
             [FromQuery] string? dangBaoChe,
-            [FromQuery] string? trangThai, // "DangDung" | "NgungDung" | null = tất cả
+            [FromQuery] string? trangThai, 
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 5)
         {
@@ -64,7 +64,6 @@ namespace MediCheck.Api.Controllers
             return Ok(new { total, page, pageSize, items });
         }
 
-        // GET: api/thuoc/stats  (4 ô thống kê ở Image 4)
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
@@ -81,7 +80,6 @@ namespace MediCheck.Api.Controllers
             return Ok(stats);
         }
 
-        // GET: api/thuoc/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -90,7 +88,6 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
-        // POST: api/thuoc
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ThuocCreateDto dto)
         {
@@ -120,7 +117,6 @@ namespace MediCheck.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = thuoc.Id }, thuoc);
         }
 
-        // PUT: api/thuoc/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ThuocUpdateDto dto)
         {
@@ -144,7 +140,6 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
-        // PATCH: api/thuoc/5/toggle-status
         [HttpPatch("{id}/toggle-status")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
@@ -156,7 +151,6 @@ namespace MediCheck.Api.Controllers
             return Ok(thuoc);
         }
 
-        // DELETE: api/thuoc/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

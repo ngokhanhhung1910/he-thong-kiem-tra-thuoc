@@ -11,7 +11,7 @@ namespace MediCheck.Api.Models
 
         [Required]
         [MaxLength(20)]
-        public string MaThuoc { get; set; } = string.Empty; // VD: TH-0001
+        public string MaThuoc { get; set; } = string.Empty; 
 
         [Required]
         [MaxLength(200)]
@@ -23,11 +23,11 @@ namespace MediCheck.Api.Models
 
         [Required]
         [MaxLength(50)]
-        public string HamLuong { get; set; } = string.Empty; // VD: "500mg"
+        public string HamLuong { get; set; } = string.Empty; 
 
         [Required]
         [MaxLength(50)]
-        public string DangBaoChe { get; set; } = string.Empty; // VD: "Viên nén", "Siro"
+        public string DangBaoChe { get; set; } = string.Empty; 
 
         [Required]
         public int TuoiApDungTu { get; set; }
