@@ -70,5 +70,43 @@ namespace MediCheck.Api.Controllers
                 NhomTuoi = nhomTuoi
             });
         }
+
+        // GET: api/baocao/top-thuoc-canh-bao?top=3
+        [HttpGet("top-thuoc-canh-bao")]
+        [RequirePermission("BAOCAO_XEM")]
+        public async Task<IActionResult> GetTopThuocCanhBao([FromQuery] int top = 3)
+        {
+            if (top < 1) top = 1;
+            if (top > 10) top = 10;
+
+            var grouped = await _context.CanhBaos
+                .GroupBy(c => c.ThuocId)
+                .Select(g => new { ThuocId = g.Key, SoLanCanhBao = g.Count() })
+                .OrderByDescending(x => x.SoLanCanhBao)
+                .Take(top)
+                .ToListAsync();
+
+            var thuocIds = grouped.Select(g => g.ThuocId).ToList();
+            var thuocs = await _context.Thuocs
+                .Where(t => thuocIds.Contains(t.Id))
+                .ToDictionaryAsync(t => t.Id);
+
+            var danhSach = grouped.Select((g, index) =>
+            {
+                thuocs.TryGetValue(g.ThuocId, out var thuoc);
+                return new TopThuocCanhBaoDto
+                {
+                    Hang = index + 1,
+                    ThuocId = g.ThuocId,
+                    TenThuoc = thuoc?.TenThuoc ?? "Không rõ",
+                    HoatChat = thuoc?.HoatChatChinh ?? "—",
+                    SoLanCanhBao = g.SoLanCanhBao,
+                    MucDoDoTuoi = thuoc?.GhiChuChongChiDinh
+                        ?? $"Từ {thuoc?.TuoiApDungTu} - {thuoc?.TuoiApDungDen} tuổi"
+                };
+            }).ToList();
+
+            return Ok(new TopThuocCanhBaoResponseDto { DanhSach = danhSach });
+        }
     }
 }
