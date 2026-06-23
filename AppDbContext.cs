@@ -14,9 +14,12 @@ namespace MediCheck.Api.Data
         public DbSet<LieuLuongTheoNhomTuoi> LieuLuongTheoNhomTuois => Set<LieuLuongTheoNhomTuoi>();
         public DbSet<BenhNhan> BenhNhans => Set<BenhNhan>();
         public DbSet<DonThuoc> DonThuocs => Set<DonThuoc>();
+        public DbSet<DonKeThuoc> DonKeThuocs => Set<DonKeThuoc>();
+        public DbSet<ChiTietDonThuoc> ChiTietDonThuocs => Set<ChiTietDonThuoc>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +60,27 @@ namespace MediCheck.Api.Data
                 .WithMany()
                 .HasForeignKey(d => d.BacSiKeId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<DonKeThuoc>()
+                .HasOne(d => d.BenhNhan)
+                .WithMany()
+                .HasForeignKey(d => d.BenhNhanId);
+
+            modelBuilder.Entity<DonKeThuoc>()
+                .HasOne(d => d.BacSiKe)
+                .WithMany()
+                .HasForeignKey(d => d.BacSiKeId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ChiTietDonThuoc>()
+                .HasOne(c => c.DonKeThuoc)
+                .WithMany(d => d.ChiTiets)
+                .HasForeignKey(c => c.DonKeThuocId);
+
+            modelBuilder.Entity<ChiTietDonThuoc>()
+                .HasOne(c => c.Thuoc)
+                .WithMany()
+                .HasForeignKey(c => c.ThuocId);
 
             modelBuilder.Entity<NhomThuoc>().HasData(
                 new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },
