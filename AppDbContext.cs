@@ -16,6 +16,7 @@ namespace MediCheck.Api.Data
         public DbSet<DonThuoc> DonThuocs => Set<DonThuoc>();
         public DbSet<DonKeThuoc> DonKeThuocs => Set<DonKeThuoc>();
         public DbSet<ChiTietDonThuoc> ChiTietDonThuocs => Set<ChiTietDonThuoc>();
+        public DbSet<CanhBao> CanhBaos => Set<CanhBao>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
@@ -81,6 +82,17 @@ namespace MediCheck.Api.Data
                 .HasOne(c => c.Thuoc)
                 .WithMany()
                 .HasForeignKey(c => c.ThuocId);
+
+            modelBuilder.Entity<CanhBao>()
+                .HasOne(c => c.Thuoc)
+                .WithMany()
+                .HasForeignKey(c => c.ThuocId);
+
+            modelBuilder.Entity<CanhBao>()
+                .HasOne(c => c.BenhNhan)
+                .WithMany()
+                .HasForeignKey(c => c.BenhNhanId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<NhomThuoc>().HasData(
                 new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },
