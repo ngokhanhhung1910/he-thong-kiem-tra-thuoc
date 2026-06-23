@@ -50,6 +50,20 @@ namespace MediCheck.Api.Controllers
                 lyDo = thuoc.GhiChuChongChiDinh ?? $"Thuốc {thuoc.TenThuoc} chống chỉ định cho độ tuổi này. Khuyến nghị từ {thuoc.TuoiApDungTu} đến {thuoc.TuoiApDungDen} tuổi.";
             }
 
+            if (!anToan)
+            {
+                Enum.TryParse<Models.MucDoCanhBao>(mucDo, true, out var mucDoEnum);
+                _context.CanhBaos.Add(new Models.CanhBao
+                {
+                    ThuocId = medicine_id,
+                    TuoiKiemTra = age,
+                    MucDo = mucDoEnum,
+                    LyDo = lyDo,
+                    ThoiGian = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+            }
+
             var thuocThayThe = await _context.Thuocs
                 .Where(t => t.Id != medicine_id
                     && t.DangSuDung
