@@ -121,6 +121,19 @@ async function selectPatient(id) {
   const res = await fetch(`${API_BASE}/${id}`);
   const p = await res.json();
 
+  const presRes = await fetch(`${API_BASE}/${id}/prescriptions`);
+  const prescriptions = await presRes.json();
+
+  const timelineHtml = prescriptions.length > 0
+    ? prescriptions.map(d => {
+        const badge = d.ketQuaKiemTra === 'AnToan'
+          ? `<span class="badge-ok">✅ An toàn</span>`
+          : `<span class="badge-warn">⚠ Cảnh báo</span>`;
+        const ngay = new Date(d.ngayKe).toLocaleString('vi-VN');
+        return `<div class="timeline-item">${ngay}<br>Bác sĩ kê: ${d.tenBacSi || 'Không rõ'}<br>Đơn thuốc: ${d.tenThuoc} -> [ ${badge} ]</div>`;
+      }).join('')
+    : `<div class="empty-state" style="padding:16px 0;">Chưa có lịch sử kê đơn cho bệnh nhân này</div>`;
+
   document.getElementById('detailPanel').innerHTML = `
     <div class="detail-title">CHI TIẾT HỒ SƠ: ${p.hoTen}</div>
     <div class="detail-line"><b>Mã BN:</b> ${p.maBenhNhan}</div>
@@ -128,7 +141,7 @@ async function selectPatient(id) {
     <div class="detail-line"><b>CCCD:</b> ${p.cccd || 'Chưa cập nhật'}</div>
     <div class="detail-line"><b>Tiền sử bệnh:</b> ${p.tienSuBenh || 'Không có'}</div>
     <div class="timeline-title">LỊCH SỬ KÊ ĐƠN & KIỂM TRA THUỐC</div>
-    <div class="empty-state" style="padding:16px 0;">Chưa có lịch sử kê đơn cho bệnh nhân này</div>
+    ${timelineHtml}
   `;
 }
 
