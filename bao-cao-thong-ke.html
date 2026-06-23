@@ -110,7 +110,7 @@
 
 <script>
 const API_BASE = "http://localhost:5000/api/baocao";
-const TOKEN = "";
+const TOKEN = localStorage.getItem('token') || "";
 
 const NHOM_MAU = {
   "0 - 5 tuổi": "#e0432f",

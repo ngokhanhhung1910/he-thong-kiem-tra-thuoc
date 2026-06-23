@@ -146,9 +146,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       return;
     }
     const data = await res.json();
-    localStorage.removeItem('token'); 
+    if (data.token) localStorage.setItem('token', data.token);
     console.log('Đăng nhập thành công', data);
-    window.location.href = "dashboard.html";
+    window.location.href = "danh-muc-thuoc.html";
   } catch (err) {
     errorBox.textContent = 'Không kết nối được tới server.';
     errorBox.style.display = 'block';
