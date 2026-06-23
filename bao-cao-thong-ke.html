@@ -35,6 +35,14 @@
   .stat-total { text-align:center; margin-bottom:12px; font-size:13px; color:#8a93a6; }
   .stat-total b { color:#1f2533; font-size:18px; display:block; margin-top:4px; }
   .error-msg { color:#e0432f; font-size:13px; text-align:center; padding:40px 0; }
+  .section-box + .section-box { margin-top:22px; }
+  .bar-chart-wrap { max-width:640px; margin:0 auto; }
+  table.top-table { width:100%; border-collapse:collapse; margin-top:18px; }
+  table.top-table th { text-align:left; font-size:12px; color:#8a93a6; padding:12px 14px; border-bottom:1px solid #eef0f5; }
+  table.top-table td { padding:14px; font-size:13px; border-bottom:1px solid #f3f4f8; }
+  .count-red { color:#e0432f; font-weight:700; }
+  .count-yellow { color:#e08a1f; font-weight:700; }
+  .count-green { color:#1e9e53; font-weight:700; }
 </style>
 </head>
 <body>
@@ -74,6 +82,28 @@
         <div class="chart-summary" id="legendContainer"></div>
         <div class="error-msg" id="errorMsg" style="display:none;"></div>
       </div>
+
+      <div class="section-box">
+        <div class="section-title">TOP 3 LOẠI THUỐC BỊ CẢNH BÁO NHIỀU NHẤT</div>
+        <div class="bar-chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+        <table class="top-table" id="topThuocTable">
+          <thead>
+            <tr>
+              <th>Hạng</th>
+              <th>Tên thuốc</th>
+              <th>Hoạt chất</th>
+              <th>Số lần hệ thống ngăn chặn</th>
+              <th>Mức độ độ tuổi</th>
+            </tr>
+          </thead>
+          <tbody id="topThuocBody">
+            <tr><td colspan="5" style="text-align:center;color:#8a93a6;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+        <div class="error-msg" id="barErrorMsg" style="display:none;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -89,6 +119,10 @@ const NHOM_MAU = {
 };
 
 let pieChart = null;
+let barChart = null;
+
+const BAR_MAU = ['#e0432f', '#e08a1f', '#1e9e53', '#2f6fed', '#8a93a6'];
+const COUNT_CLASS = ['count-red', 'count-yellow', 'count-green'];
 
 async function loadPieChart() {
   const errorEl = document.getElementById('errorMsg');
@@ -157,6 +191,92 @@ async function loadPieChart() {
 }
 
 loadPieChart();
+loadBarChart();
+
+async function loadBarChart() {
+  const errorEl = document.getElementById('barErrorMsg');
+  const tbody = document.getElementById('topThuocBody');
+  errorEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/top-thuoc-canh-bao?top=3`, {
+      headers: TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}
+    });
+
+    if (!res.ok) {
+      errorEl.textContent = res.status === 401 || res.status === 403
+        ? `Lỗi ${res.status}: Cần đăng nhập với quyền Admin/Bác sĩ và dán JWT vào biến TOKEN.`
+        : `Lỗi tải dữ liệu (${res.status}).`;
+      errorEl.style.display = 'block';
+      tbody.innerHTML = '';
+      return;
+    }
+
+    const data = await res.json();
+    const list = data.danhSach || [];
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#8a93a6;">Chưa có dữ liệu cảnh báo</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((item, i) => `
+      <tr>
+        <td>${item.hang}</td>
+        <td>${item.tenThuoc}</td>
+        <td>${item.hoatChat}</td>
+        <td class="${COUNT_CLASS[i] || ''}">${item.soLanCanhBao} lần</td>
+        <td>${item.mucDoDoTuoi}</td>
+      </tr>
+    `).join('');
+
+    const labels = list.map(x => x.tenThuoc);
+    const values = list.map(x => x.soLanCanhBao);
+    const colors = list.map((_, i) => BAR_MAU[i] || '#8a93a6');
+
+    if (barChart) barChart.destroy();
+
+    barChart = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Số lần cảnh báo',
+          data: values,
+          backgroundColor: colors,
+          borderRadius: 6,
+          maxBarThickness: 72
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.y} lần cảnh báo`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            title: { display: true, text: 'Số lần' }
+          },
+          x: {
+            ticks: { maxRotation: 45, minRotation: 0 }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    errorEl.textContent = 'Không kết nối được tới server. Hãy chạy API trước.';
+    errorEl.style.display = 'block';
+    tbody.innerHTML = '';
+  }
+}
 </script>
 </body>
 </html>
