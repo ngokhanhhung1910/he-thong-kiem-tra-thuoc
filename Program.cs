@@ -40,10 +40,12 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<MediCheck.Api.Services.DonThuocPdfService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
