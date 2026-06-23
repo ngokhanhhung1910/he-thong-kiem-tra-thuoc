@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MediCheck.Api.Data;
 using MediCheck.Api.Models;
 using MediCheck.Api.DTOs;
+using MediCheck.Api.Services;
 
 namespace MediCheck.Api.Controllers
 {
@@ -11,10 +12,12 @@ namespace MediCheck.Api.Controllers
     public class DonKeThuocController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly DonThuocPdfService _pdfService;
 
-        public DonKeThuocController(AppDbContext context)
+        public DonKeThuocController(AppDbContext context, DonThuocPdfService pdfService)
         {
             _context = context;
+            _pdfService = pdfService;
         }
 
         private static int TinhTuoi(DateTime ngaySinh)
@@ -98,6 +101,21 @@ namespace MediCheck.Api.Controllers
             var result = await BuildResponse(id);
             if (result == null) return NotFound("Không tìm thấy đơn thuốc.");
             return Ok(result);
+        }
+
+        [HttpGet("{id}/pdf")]
+        public async Task<IActionResult> GetPdf(int id)
+        {
+            var don = await _context.DonKeThuocs
+                .Include(d => d.BenhNhan)
+                .Include(d => d.BacSiKe)
+                .Include(d => d.ChiTiets).ThenInclude(c => c.Thuoc)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (don == null) return NotFound("Không tìm thấy đơn thuốc.");
+
+            var pdfBytes = _pdfService.TaoPdf(don);
+            return File(pdfBytes, "application/pdf", $"DonThuoc_{don.MaDon}.pdf");
         }
 
         private async Task<DonKeThuocResponseDto?> BuildResponse(int id)
