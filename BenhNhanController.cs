@@ -114,5 +114,30 @@ namespace MediCheck.Api.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã xoá bệnh nhân." });
         }
+
+        [HttpGet("{id}/prescriptions")]
+        public async Task<IActionResult> GetPrescriptions(int id)
+        {
+            var benhNhan = await _context.BenhNhans.FindAsync(id);
+            if (benhNhan == null) return NotFound("Không tìm thấy bệnh nhân.");
+
+            var list = await _context.DonThuocs
+                .Include(d => d.Thuoc)
+                .Include(d => d.BacSiKe)
+                .Where(d => d.BenhNhanId == id)
+                .OrderByDescending(d => d.NgayKe)
+                .Select(d => new DonThuocResponseDto
+                {
+                    Id = d.Id,
+                    NgayKe = d.NgayKe,
+                    TenThuoc = d.Thuoc.TenThuoc,
+                    TenBacSi = d.BacSiKe != null ? d.BacSiKe.HoTen : null,
+                    KetQuaKiemTra = d.KetQuaKiemTra.ToString(),
+                    GhiChu = d.GhiChu
+                })
+                .ToListAsync();
+
+            return Ok(list);
+        }
     }
 }
