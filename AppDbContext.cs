@@ -13,11 +13,10 @@ namespace MediCheck.Api.Data
         public DbSet<GioiHanTuoiThuoc> GioiHanTuoiThuocs => Set<GioiHanTuoiThuoc>();
         public DbSet<LieuLuongTheoNhomTuoi> LieuLuongTheoNhomTuois => Set<LieuLuongTheoNhomTuoi>();
         public DbSet<BenhNhan> BenhNhans => Set<BenhNhan>();
+        public DbSet<DonThuoc> DonThuocs => Set<DonThuoc>();
         public DbSet<VaiTroEntity> VaiTroDanhSach => Set<VaiTroEntity>();
         public DbSet<QuyenEntity> Quyens => Set<QuyenEntity>();
         public DbSet<VaiTroQuyen> VaiTroQuyens => Set<VaiTroQuyen>();
-
-   
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +41,22 @@ namespace MediCheck.Api.Data
             modelBuilder.Entity<BenhNhan>()
                 .HasIndex(b => b.MaBenhNhan)
                 .IsUnique();
+
+            modelBuilder.Entity<DonThuoc>()
+                .HasOne(d => d.BenhNhan)
+                .WithMany()
+                .HasForeignKey(d => d.BenhNhanId);
+
+            modelBuilder.Entity<DonThuoc>()
+                .HasOne(d => d.Thuoc)
+                .WithMany()
+                .HasForeignKey(d => d.ThuocId);
+
+            modelBuilder.Entity<DonThuoc>()
+                .HasOne(d => d.BacSiKe)
+                .WithMany()
+                .HasForeignKey(d => d.BacSiKeId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<NhomThuoc>().HasData(
                 new NhomThuoc { Id = 1, TenNhomThuoc = "Giảm đau - Hạ sốt" },

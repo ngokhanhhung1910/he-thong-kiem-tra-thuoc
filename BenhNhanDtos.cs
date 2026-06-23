@@ -6,7 +6,7 @@ namespace MediCheck.Api.DTOs
         public DateTime NgaySinh { get; set; }
         public string GioiTinh { get; set; } = "Nam";
         public string? CCCD { get; set; }
-        public string? TiensuBenh { get; set; }
+        public string? TienSuBenh { get; set; }
     }
 
     public class BenhNhanUpdateDto : BenhNhanCreateDto
@@ -23,5 +23,15 @@ namespace MediCheck.Api.DTOs
         public string GioiTinh { get; set; } = string.Empty;
         public string? CCCD { get; set; }
         public string? TienSuBenh { get; set; }
+    }
+
+    public class DonThuocResponseDto
+    {
+        public int Id { get; set; }
+        public DateTime NgayKe { get; set; }
+        public string TenThuoc { get; set; } = string.Empty;
+        public string? TenBacSi { get; set; }
+        public string KetQuaKiemTra { get; set; } = string.Empty;
+        public string? GhiChu { get; set; }
     }
 }
