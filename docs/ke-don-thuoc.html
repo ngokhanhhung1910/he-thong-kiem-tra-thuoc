@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>MediCheck - Kê đơn thuốc</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#f4f6fa; color:#1f2533; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
+  .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
+  .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  .sb-logo .text-main { font-size:15px; font-weight:600; }
+  .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
+  .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; text-decoration:none; }
+  .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .main { flex:1; display:flex; flex-direction:column; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; display:flex; justify-content:space-between; align-items:center; }
+  .topbar b { color:#2f6fed; }
+  .user-menu { position:relative; }
+  .user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .user-avatar { width:30px; height:30px; border-radius:50%; background:#2f6fed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .user-dropdown { position:absolute; top:42px; right:0; background:#fff; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); min-width:160px; display:none; overflow:hidden; }
+  .user-dropdown.show { display:block; }
+  .user-dropdown div { padding:11px 16px; font-size:13px; cursor:pointer; color:#1f2533; }
+  .user-dropdown div:hover { background:#f4f6fa; }
+
+  .content { padding:26px 28px; max-width:800px; }
+  .page-header h1 { font-size:24px; font-weight:600; }
+  .page-header p { font-size:13px; color:#8a93a6; margin-top:4px; margin-bottom:22px; }
+
+  .section-box { background:#fff; border-radius:10px; padding:20px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .section-title { font-size:14px; font-weight:600; margin-bottom:14px; }
+  label { display:block; font-size:12px; color:#6b7280; margin-bottom:6px; }
+  select, input { width:100%; padding:11px 14px; border:1px solid #e1e4ea; border-radius:8px; font-size:13px; background:#fafbfd; margin-bottom:12px; }
+
+  .thuoc-row { display:flex; gap:10px; align-items:flex-end; margin-bottom:10px; }
+  .thuoc-row select { margin-bottom:0; }
+  .btn-remove { background:#ffe7e7; color:#e0432f; border:none; border-radius:8px; padding:11px 14px; cursor:pointer; }
+  .btn-add-row { background:#eef1f8; border:none; padding:10px 16px; border-radius:8px; font-size:13px; cursor:pointer; margin-bottom:14px; }
+  .btn-submit { width:100%; padding:13px; border:none; border-radius:8px; background:#2f6fed; color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+
+  .result-table { width:100%; border-collapse:collapse; margin-top:10px; }
+  .result-table th, .result-table td { padding:10px 12px; font-size:12px; border-bottom:1px solid #f0f1f5; text-align:left; }
+  .badge-ok { color:#1e9e53; font-weight:600; }
+  .badge-warn { color:#e08a1f; font-weight:600; }
+  .badge-danger { color:#e0432f; font-weight:600; }
+  .btn-pdf { background:#16284d; color:#fff; border:none; padding:11px 18px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:14px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="circle">M</div>
+      <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
+    </div>
+    <div class="sb-group-title">TỔNG QUAN</div>
+    <a class="sb-item" href="dashboard.html">📊 Tổng quan</a>
+    <div class="sb-group-title">NGHIỆP VỤ</div>
+    <a class="sb-item" href="danh-muc-thuoc.html">💊 Danh mục thuốc</a>
+    <a class="sb-item active" href="ke-don-thuoc.html">📝 Kê đơn thuốc</a>
+    <a class="sb-item" href="kiem-tra-thuoc.html">✅ Kiểm tra thuốc theo độ tuổi</a>
+    <a class="sb-item" href="ho-so-benh-nhan.html">👥 Hồ sơ bệnh nhân</a>
+    <div class="sb-group-title">QUẢN TRỊ</div>
+    <a class="sb-item" href="tai-khoan-nguoi-dung.html">🛡 Tài khoản người dùng</a>
+    <a class="sb-item" href="phan-quyen.html">🔑 Phân quyền</a>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>MediCheck / <b>Kê đơn thuốc</b></div>
+      <div class="user-menu">
+        <div class="user-trigger" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameDisplay">Người dùng</span>
+          <span>▾</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div onclick="logout()">🚪 Đăng xuất</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Kê đơn thuốc</h1>
+        <p>Hệ thống tự động kiểm tra độ tuổi ngay khi thêm thuốc vào đơn</p>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title">1. Chọn bệnh nhân</div>
+        <label>Bệnh nhân</label>
+        <select id="benhNhanSelect"><option value="">Chọn bệnh nhân...</option></select>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title">2. Danh sách thuốc kê đơn</div>
+        <div id="thuocRows"></div>
+        <button class="btn-add-row" onclick="addThuocRow()">+ Thêm thuốc</button>
+        <button class="btn-submit" onclick="submitDon()">Kê đơn & Kiểm tra tự động</button>
+      </div>
+
+      <div class="section-box" id="resultBox" style="display:none;">
+        <div class="section-title">Kết quả kê đơn</div>
+        <table class="result-table">
+          <thead><tr><th>Tên thuốc</th><th>Kết quả</th><th>Lý do</th></tr></thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+        <button class="btn-pdf" onclick="downloadPdf()">📄 Tải đơn thuốc PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BENHNHAN = "https://khanhhung.somee.com/api/benhnhan";
+const API_THUOC = "https://khanhhung.somee.com/api/thuoc";
+const API_DON = "https://khanhhung.somee.com/api/donkethuoc";
+
+let lastDonId = null;
+let thuocOptionsHtml = '<option value="">Chọn thuốc...</option>';
+
+function getToken() { return localStorage.getItem('medicheck_token') || ''; }
+function getUser() { const raw = localStorage.getItem('medicheck_user'); return raw ? JSON.parse(raw) : null; }
+function authHeaders() { const t = getToken(); return t ? { 'Authorization': `Bearer ${t}` } : {}; }
+function checkAuth() { if (!getToken()) window.location.href = 'login.html'; }
+function renderUserInfo() {
+  const u = getUser();
+  if (!u) return;
+  document.getElementById('userNameDisplay').textContent = u.hoTen;
+  document.getElementById('userAvatar').textContent = u.hoTen.charAt(0).toUpperCase();
+}
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+function logout() {
+  localStorage.removeItem('medicheck_token');
+  localStorage.removeItem('medicheck_user');
+  window.location.href = 'login.html';
+}
+window.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) document.getElementById('userDropdown')?.classList.remove('show');
+});
+
+async function loadBenhNhan() {
+  const res = await fetch(API_BENHNHAN);
+  const list = await res.json();
+  const select = document.getElementById('benhNhanSelect');
+  list.forEach(b => select.innerHTML += `<option value="${b.id}">${b.hoTen} (${b.tuoi} tuổi)</option>`);
+}
+
+async function loadThuocOptions() {
+  const res = await fetch(`${API_THUOC}?page=1&pageSize=1000`);
+  const data = await res.json();
+  data.items.forEach(t => thuocOptionsHtml += `<option value="${t.id}">${t.tenThuoc}</option>`);
+}
+
+function addThuocRow() {
+  const row = document.createElement('div');
+  row.className = 'thuoc-row';
+  row.innerHTML = `<select class="thuocSelect">${thuocOptionsHtml}</select><button class="btn-remove" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('thuocRows').appendChild(row);
+}
+
+async function submitDon() {
+  const benhNhanId = document.getElementById('benhNhanSelect').value;
+  const thuocSelects = document.querySelectorAll('.thuocSelect');
+  const thuocIds = Array.from(thuocSelects).map(s => parseInt(s.value)).filter(v => v);
+
+  if (!benhNhanId || thuocIds.length === 0) {
+    alert('Vui lòng chọn bệnh nhân và ít nhất 1 loại thuốc.');
+    return;
+  }
+
+  const user = getUser();
+  const payload = { benhNhanId: parseInt(benhNhanId), bacSiKeId: user ? user.id : null, thuocIds };
+
+  const res = await fetch(API_DON, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) { alert(await res.text()); return; }
+
+  const data = await res.json();
+  lastDonId = data.id;
+  renderResult(data);
+}
+
+function renderResult(data) {
+  document.getElementById('resultBox').style.display = 'block';
+  document.getElementById('resultBody').innerHTML = data.chiTiets.map(c => {
+    const badge = c.ketQuaKiemTra === 'AnToan'
+      ? `<span class="badge-ok">✅ An toàn</span>`
+      : c.ketQuaKiemTra === 'CanhBao'
+        ? `<span class="badge-warn">⚠ Thận trọng</span>`
+        : `<span class="badge-danger">❌ Nguy hiểm</span>`;
+    return `<tr><td>${c.tenThuoc}</td><td>${badge}</td><td>${c.lyDoCanhBao || ''}</td></tr>`;
+  }).join('');
+}
+
+function downloadPdf() {
+  if (!lastDonId) return;
+  window.open(`${API_DON}/${lastDonId}/pdf`, '_blank');
+}
+
+checkAuth();
+renderUserInfo();
+loadBenhNhan();
+loadThuocOptions().then(addThuocRow);
+</script>
+</body>
+</html>
+
+
+

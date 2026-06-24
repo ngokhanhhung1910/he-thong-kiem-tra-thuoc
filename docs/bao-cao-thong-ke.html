@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>MediCheck - Báo cáo & thống kê</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#f4f6fa; color:#1f2533; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
+  .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
+  .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  .sb-logo .text-main { font-size:15px; font-weight:600; }
+  .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
+  .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; }
+  .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .main { flex:1; display:flex; flex-direction:column; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; }
+  .topbar b { color:#2f6fed; }
+  .content { padding:26px 28px; }
+  .page-header h1 { font-size:24px; font-weight:600; }
+  .page-header p { font-size:13px; color:#8a93a6; margin-top:4px; margin-bottom:22px; }
+
+  .section-box { background:#fff; border-radius:10px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .section-title { font-size:13px; font-weight:700; color:#4a5266; margin-bottom:16px; letter-spacing:0.3px; }
+  .chart-wrap { max-width:420px; margin:0 auto; position:relative; }
+  .chart-summary { display:flex; justify-content:center; gap:24px; margin-top:18px; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:8px; font-size:13px; }
+  .legend-dot { width:12px; height:12px; border-radius:50%; }
+  .stat-total { text-align:center; margin-bottom:12px; font-size:13px; color:#8a93a6; }
+  .stat-total b { color:#1f2533; font-size:18px; display:block; margin-top:4px; }
+  .error-msg { color:#e0432f; font-size:13px; text-align:center; padding:40px 0; }
+  .section-box + .section-box { margin-top:22px; }
+  .bar-chart-wrap { max-width:640px; margin:0 auto; }
+  table.top-table { width:100%; border-collapse:collapse; margin-top:18px; }
+  table.top-table th { text-align:left; font-size:12px; color:#8a93a6; padding:12px 14px; border-bottom:1px solid #eef0f5; }
+  table.top-table td { padding:14px; font-size:13px; border-bottom:1px solid #f3f4f8; }
+  .count-red { color:#e0432f; font-weight:700; }
+  .count-yellow { color:#e08a1f; font-weight:700; }
+  .count-green { color:#1e9e53; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="circle">M</div>
+      <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
+    </div>
+    <div class="sb-group-title">TỔNG QUAN</div>
+    <div class="sb-item" onclick="location.href='danh-muc-thuoc.html'">📊 Tổng quan</div>
+    <div class="sb-group-title">NGHIỆP VỤ</div>
+    <div class="sb-item" onclick="location.href='danh-muc-thuoc.html'">💊 Danh mục thuốc</div>
+    <div class="sb-item" onclick="location.href='kiem-tra-thuoc.html'">✅ Kiểm tra thuốc theo độ tuổi</div>
+    <div class="sb-item" onclick="location.href='ho-so-benh-nhan.html'">👥 Hồ sơ bệnh nhân</div>
+    <div class="sb-group-title">QUẢN TRỊ</div>
+    <div class="sb-item">🛡 Tài khoản người dùng</div>
+    <div class="sb-item" onclick="location.href='phan-quyen.html'">🔑 Phân quyền</div>
+    <div class="sb-item active">📈 Báo cáo & thống kê</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">MediCheck / <b>Báo cáo & thống kê</b></div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Thống kê & báo cáo</h1>
+        <p>Phân tích dữ liệu bệnh nhân và cảnh báo trong hệ thống</p>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title">SỐ BỆNH NHÂN THEO NHÓM TUỔI</div>
+        <div class="stat-total">Tổng số bệnh nhân<b id="tongSoBenhNhan">—</b></div>
+        <div class="chart-wrap">
+          <canvas id="pieChart"></canvas>
+        </div>
+        <div class="chart-summary" id="legendContainer"></div>
+        <div class="error-msg" id="errorMsg" style="display:none;"></div>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title">TOP 3 LOẠI THUỐC BỊ CẢNH BÁO NHIỀU NHẤT</div>
+        <div class="bar-chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+        <table class="top-table" id="topThuocTable">
+          <thead>
+            <tr>
+              <th>Hạng</th>
+              <th>Tên thuốc</th>
+              <th>Hoạt chất</th>
+              <th>Số lần hệ thống ngăn chặn</th>
+              <th>Mức độ độ tuổi</th>
+            </tr>
+          </thead>
+          <tbody id="topThuocBody">
+            <tr><td colspan="5" style="text-align:center;color:#8a93a6;">Đang tải...</td></tr>
+          </tbody>
+        </table>
+        <div class="error-msg" id="barErrorMsg" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://khanhhung.somee.com/api/baocao";
+const TOKEN = localStorage.getItem('token') || "";
+
+const NHOM_MAU = {
+  "0 - 5 tuổi": "#e0432f",
+  "6 - 12 tuổi": "#e08a1f",
+  "Trên 12 tuổi": "#1e9e53"
+};
+
+let pieChart = null;
+let barChart = null;
+
+const BAR_MAU = ['#e0432f', '#e08a1f', '#1e9e53', '#2f6fed', '#8a93a6'];
+const COUNT_CLASS = ['count-red', 'count-yellow', 'count-green'];
+
+async function loadPieChart() {
+  const errorEl = document.getElementById('errorMsg');
+  errorEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/benhnhan-theo-nhom-tuoi`, {
+      headers: TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}
+    });
+
+    if (!res.ok) {
+      errorEl.textContent = res.status === 401 || res.status === 403
+        ? `Lỗi ${res.status}: Cần đăng nhập với quyền Admin/Bác sĩ và dán JWT vào biến TOKEN.`
+        : `Lỗi tải dữ liệu (${res.status}).`;
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const data = await res.json();
+    document.getElementById('tongSoBenhNhan').textContent = data.tongSoBenhNhan;
+
+    const labels = data.nhomTuoi.map(n => n.nhomTuoi);
+    const values = data.nhomTuoi.map(n => n.soLuong);
+    const colors = labels.map(l => NHOM_MAU[l] || '#8a93a6');
+
+    if (pieChart) pieChart.destroy();
+
+    pieChart = new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const item = data.nhomTuoi[ctx.dataIndex];
+                return ` ${item.nhomTuoi}: ${item.soLuong} BN (${item.tyLe}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    document.getElementById('legendContainer').innerHTML = data.nhomTuoi.map(n => `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${NHOM_MAU[n.nhomTuoi]}"></span>
+        <span>${n.nhomTuoi} — <b>${n.tyLe}%</b> (${n.soLuong} BN)</span>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    errorEl.textContent = 'Không kết nối được tới server. Hãy chạy API trước.';
+    errorEl.style.display = 'block';
+  }
+}
+
+loadPieChart();
+loadBarChart();
+
+async function loadBarChart() {
+  const errorEl = document.getElementById('barErrorMsg');
+  const tbody = document.getElementById('topThuocBody');
+  errorEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/top-thuoc-canh-bao?top=3`, {
+      headers: TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}
+    });
+
+    if (!res.ok) {
+      errorEl.textContent = res.status === 401 || res.status === 403
+        ? `Lỗi ${res.status}: Cần đăng nhập với quyền Admin/Bác sĩ và dán JWT vào biến TOKEN.`
+        : `Lỗi tải dữ liệu (${res.status}).`;
+      errorEl.style.display = 'block';
+      tbody.innerHTML = '';
+      return;
+    }
+
+    const data = await res.json();
+    const list = data.danhSach || [];
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#8a93a6;">Chưa có dữ liệu cảnh báo</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((item, i) => `
+      <tr>
+        <td>${item.hang}</td>
+        <td>${item.tenThuoc}</td>
+        <td>${item.hoatChat}</td>
+        <td class="${COUNT_CLASS[i] || ''}">${item.soLanCanhBao} lần</td>
+        <td>${item.mucDoDoTuoi}</td>
+      </tr>
+    `).join('');
+
+    const labels = list.map(x => x.tenThuoc);
+    const values = list.map(x => x.soLanCanhBao);
+    const colors = list.map((_, i) => BAR_MAU[i] || '#8a93a6');
+
+    if (barChart) barChart.destroy();
+
+    barChart = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Số lần cảnh báo',
+          data: values,
+          backgroundColor: colors,
+          borderRadius: 6,
+          maxBarThickness: 72
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.y} lần cảnh báo`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            title: { display: true, text: 'Số lần' }
+          },
+          x: {
+            ticks: { maxRotation: 45, minRotation: 0 }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    errorEl.textContent = 'Không kết nối được tới server. Hãy chạy API trước.';
+    errorEl.style.display = 'block';
+    tbody.innerHTML = '';
+  }
+}
+</script>
+</body>
+</html>
+
+
+

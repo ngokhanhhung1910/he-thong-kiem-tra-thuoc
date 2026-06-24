@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>MediCheck - Quản lý tài khoản</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#f4f6fa; color:#1f2533; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
+  .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
+  .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  .sb-logo .text-main { font-size:15px; font-weight:600; }
+  .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
+  .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; text-decoration:none; }
+  .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .main { flex:1; display:flex; flex-direction:column; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; display:flex; justify-content:space-between; align-items:center; }
+  .topbar b { color:#2f6fed; }
+  .user-menu { position:relative; }
+  .user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .user-avatar { width:30px; height:30px; border-radius:50%; background:#2f6fed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .user-dropdown { position:absolute; top:42px; right:0; background:#fff; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); min-width:160px; display:none; overflow:hidden; }
+  .user-dropdown.show { display:block; }
+  .user-dropdown div { padding:11px 16px; font-size:13px; cursor:pointer; color:#1f2533; }
+  .user-dropdown div:hover { background:#f4f6fa; }
+
+  .content { padding:26px 28px; }
+  .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+  .page-header h1 { font-size:24px; font-weight:600; }
+  .page-header p { font-size:13px; color:#8a93a6; margin-top:4px; }
+  .btn-add { background:#2f6fed; color:#fff; border:none; padding:11px 18px; border-radius:8px; font-size:14px; cursor:pointer; }
+
+  .filter-bar { display:flex; gap:10px; margin-bottom:16px; }
+  .filter-bar input, .filter-bar select { padding:10px 14px; border:1px solid #e1e4ea; border-radius:8px; font-size:13px; background:#fff; }
+  .filter-bar input { flex:1; }
+
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  th { text-align:left; font-size:12px; color:#8a93a6; padding:14px 16px; border-bottom:1px solid #eef0f5; }
+  td { padding:14px 16px; font-size:13px; border-bottom:1px solid #f3f4f8; }
+  .role-badge { padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .role-admin { background:#ffe7e7; color:#e0432f; }
+  .role-bacsi { background:#e8efff; color:#2f6fed; }
+  .role-duocsi { background:#e3f7ea; color:#1e9e53; }
+  .status-active { color:#1e9e53; font-weight:600; }
+  .status-locked { color:#e0432f; font-weight:600; }
+  .action-icon { cursor:pointer; margin-right:10px; background:none; border:none; font-size:14px; }
+
+  .modal-overlay { position:fixed; inset:0; background:rgba(15,20,35,0.55); display:none; align-items:center; justify-content:center; z-index:100; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#eef0f5; border-radius:14px; padding:28px 32px; width:420px; }
+  .modal-box h2 { color:#2f6fed; font-size:18px; margin-bottom:14px; }
+  .form-row { margin-bottom:14px; }
+  .form-row label { display:block; font-size:13px; margin-bottom:6px; font-weight:500; }
+  .form-row input, .form-row select { width:100%; padding:11px 14px; border:1px solid #d8dbe3; border-radius:8px; font-size:13px; background:#fff; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .btn-cancel { padding:11px 20px; border-radius:8px; border:1px solid #d8dbe3; background:#fff; cursor:pointer; font-size:13px; }
+  .btn-save { padding:11px 20px; border-radius:8px; border:none; background:#2f6fed; color:#fff; cursor:pointer; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="circle">M</div>
+      <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
+    </div>
+    <div class="sb-group-title">TỔNG QUAN</div>
+    <a class="sb-item" href="dashboard.html">📊 Tổng quan</a>
+    <div class="sb-group-title">NGHIỆP VỤ</div>
+    <a class="sb-item" href="danh-muc-thuoc.html">💊 Danh mục thuốc</a>
+    <a class="sb-item" href="ke-don-thuoc.html">📝 Kê đơn thuốc</a>
+    <a class="sb-item" href="kiem-tra-thuoc.html">✅ Kiểm tra thuốc theo độ tuổi</a>
+    <a class="sb-item" href="ho-so-benh-nhan.html">👥 Hồ sơ bệnh nhân</a>
+    <div class="sb-group-title">QUẢN TRỊ</div>
+    <a class="sb-item active" href="tai-khoan-nguoi-dung.html">🛡 Tài khoản người dùng</a>
+    <a class="sb-item" href="phan-quyen.html">🔑 Phân quyền</a>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>MediCheck / <b>Quản lý tài khoản</b></div>
+      <div class="user-menu">
+        <div class="user-trigger" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameDisplay">Người dùng</span>
+          <span>▾</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div onclick="logout()">🚪 Đăng xuất</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1>Quản lý tài khoản người dùng</h1>
+          <p>Quản lý danh sách tài khoản và phân quyền trong hệ thống</p>
+        </div>
+        <button class="btn-add" onclick="openModal()">+ Thêm tài khoản</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên, email...">
+      </div>
+
+      <table>
+        <thead><tr><th>#</th><th>Họ và tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h2 id="modalTitle">Thêm Tài Khoản Mới</h2>
+    <input type="hidden" id="editId">
+
+    <div class="form-row">
+      <label>Họ và tên</label>
+      <input type="text" id="hoTen" placeholder="Nhập họ và tên">
+    </div>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="Nhập email">
+    </div>
+    <div class="form-row" id="passwordRow">
+      <label>Mật khẩu</label>
+      <input type="password" id="password" placeholder="Nhập mật khẩu">
+    </div>
+    <div class="form-row">
+      <label>Vai trò</label>
+      <select id="vaiTro">
+        <option value="Admin">Admin</option>
+        <option value="BacSi">Bác sĩ</option>
+        <option value="DuocSi">Dược sĩ</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Trạng thái</label>
+      <select id="trangThai">
+        <option value="HoatDong">Hoạt động</option>
+        <option value="TamKhoa">Tạm khoá</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Huỷ</button>
+      <button class="btn-save" onclick="saveUser()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://khanhhung.somee.com/api/nguoidung";
+
+function getToken() { return localStorage.getItem('medicheck_token') || ''; }
+function getUser() { const raw = localStorage.getItem('medicheck_user'); return raw ? JSON.parse(raw) : null; }
+function authHeaders() { const t = getToken(); return t ? { 'Authorization': `Bearer ${t}` } : {}; }
+
+function checkAuth() { if (!getToken()) window.location.href = 'login.html'; }
+function renderUserInfo() {
+  const u = getUser();
+  if (!u) return;
+  document.getElementById('userNameDisplay').textContent = u.hoTen;
+  document.getElementById('userAvatar').textContent = u.hoTen.charAt(0).toUpperCase();
+}
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+function logout() {
+  localStorage.removeItem('medicheck_token');
+  localStorage.removeItem('medicheck_user');
+  window.location.href = 'login.html';
+}
+window.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) document.getElementById('userDropdown')?.classList.remove('show');
+});
+
+const roleClass = { Admin: 'role-admin', BacSi: 'role-bacsi', DuocSi: 'role-duocsi' };
+const roleLabel = { Admin: 'Admin', BacSi: 'Bác sĩ', DuocSi: 'Dược sĩ' };
+
+async function loadTable() {
+  const search = document.getElementById('searchInput').value;
+  const res = await fetch(`${API_BASE}?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+
+  if (res.status === 401 || res.status === 403) {
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#e0432f;">Bạn không có quyền truy cập chức năng này.</td></tr>`;
+    return;
+  }
+
+  const list = await res.json();
+  document.getElementById('tableBody').innerHTML = list.map((u, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${u.hoTen}</td>
+      <td>${u.email}</td>
+      <td><span class="role-badge ${roleClass[u.vaiTro] || ''}">${roleLabel[u.vaiTro] || u.vaiTro}</span></td>
+      <td>${u.trangThai === 'HoatDong' ? '<span class="status-active">Hoạt động</span>' : '<span class="status-locked">Tạm khoá</span>'}</td>
+      <td>
+        <button class="action-icon" onclick='editUser(${JSON.stringify(u)})'>✏️</button>
+        <button class="action-icon" onclick="deleteUser(${u.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal() {
+  document.getElementById('modalTitle').textContent = 'Thêm Tài Khoản Mới';
+  document.getElementById('editId').value = '';
+  document.getElementById('passwordRow').style.display = 'block';
+  ['hoTen', 'email', 'password'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('vaiTro').value = 'DuocSi';
+  document.getElementById('trangThai').value = 'HoatDong';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function editUser(u) {
+  document.getElementById('modalTitle').textContent = 'Sửa Tài Khoản';
+  document.getElementById('editId').value = u.id;
+  document.getElementById('passwordRow').style.display = 'none';
+  document.getElementById('hoTen').value = u.hoTen;
+  document.getElementById('email').value = u.email;
+  document.getElementById('vaiTro').value = u.vaiTro;
+  document.getElementById('trangThai').value = u.trangThai;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+async function saveUser() {
+  const id = document.getElementById('editId').value;
+
+  if (id) {
+    const payload = {
+      hoTen: document.getElementById('hoTen').value,
+      vaiTro: document.getElementById('vaiTro').value,
+      trangThai: document.getElementById('trangThai').value
+    };
+    const res = await fetch(`${API_BASE}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) { alert(await res.text()); return; }
+  } else {
+    const payload = {
+      hoTen: document.getElementById('hoTen').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
+      vaiTro: document.getElementById('vaiTro').value,
+      trangThai: document.getElementById('trangThai').value
+    };
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) { alert(await res.text()); return; }
+  }
+
+  closeModal();
+  loadTable();
+}
+
+async function deleteUser(id) {
+  if (!confirm('Bạn có chắc muốn xoá tài khoản này?')) return;
+  await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: authHeaders() });
+  loadTable();
+}
+
+document.getElementById('searchInput').addEventListener('input', loadTable);
+
+checkAuth();
+renderUserInfo();
+loadTable();
+</script>
+</body>
+</html>
+
+
+

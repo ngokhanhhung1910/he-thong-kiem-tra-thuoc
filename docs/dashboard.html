@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>MediCheck - Tổng quan</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+  body { background:#f4f6fa; color:#1f2533; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar { width:230px; background:#16284d; color:#fff; padding:24px 0; flex-shrink:0; }
+  .sb-logo { display:flex; align-items:center; gap:10px; padding:0 20px 24px; }
+  .sb-logo .circle { width:34px; height:34px; border-radius:50%; background:#2f6fed; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  .sb-logo .text-main { font-size:15px; font-weight:600; }
+  .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
+  .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; text-decoration:none; }
+  .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .main { flex:1; display:flex; flex-direction:column; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; display:flex; justify-content:space-between; align-items:center; }
+  .topbar b { color:#2f6fed; }
+  .user-menu { position:relative; }
+  .user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .user-avatar { width:30px; height:30px; border-radius:50%; background:#2f6fed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .user-dropdown { position:absolute; top:42px; right:0; background:#fff; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); min-width:160px; display:none; overflow:hidden; }
+  .user-dropdown.show { display:block; }
+  .user-dropdown div { padding:11px 16px; font-size:13px; cursor:pointer; color:#1f2533; }
+  .user-dropdown div:hover { background:#f4f6fa; }
+
+  .content { padding:26px 28px; }
+  .page-header h1 { font-size:24px; font-weight:600; }
+  .page-header p { font-size:13px; color:#8a93a6; margin-top:4px; margin-bottom:22px; }
+
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+  .stat-card { background:#fff; border-radius:10px; padding:16px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .stat-card .label { font-size:12px; color:#8a93a6; margin-bottom:8px; }
+  .stat-card .value { font-size:24px; font-weight:700; }
+
+  .panel { background:#fff; border-radius:10px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .panel-title { font-size:14px; font-weight:600; margin-bottom:14px; }
+  table.warn-table { width:100%; border-collapse:collapse; }
+  table.warn-table th { text-align:left; font-size:11px; color:#8a93a6; padding:8px; border-bottom:1px solid #eef0f5; }
+  table.warn-table td { padding:10px 8px; font-size:13px; border-bottom:1px solid #f3f4f8; }
+  .badge-danger { color:#e0432f; font-weight:600; }
+  .badge-warn { color:#e08a1f; font-weight:600; }
+  .empty-state { color:#8a93a6; font-size:13px; text-align:center; padding:30px 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="circle">M</div>
+      <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
+    </div>
+    <div class="sb-group-title">TỔNG QUAN</div>
+    <a class="sb-item active" href="dashboard.html">📊 Tổng quan</a>
+    <div class="sb-group-title">NGHIỆP VỤ</div>
+    <a class="sb-item" href="danh-muc-thuoc.html">💊 Danh mục thuốc</a>
+    <a class="sb-item" href="ke-don-thuoc.html">📝 Kê đơn thuốc</a>
+    <a class="sb-item" href="kiem-tra-thuoc.html">✅ Kiểm tra thuốc theo độ tuổi</a>
+    <a class="sb-item" href="ho-so-benh-nhan.html">👥 Hồ sơ bệnh nhân</a>
+    <div class="sb-group-title">QUẢN TRỊ</div>
+    <a class="sb-item" href="tai-khoan-nguoi-dung.html">🛡 Tài khoản người dùng</a>
+    <a class="sb-item" href="phan-quyen.html">🔑 Phân quyền</a>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>MediCheck / <b>Tổng quan</b></div>
+      <div class="user-menu">
+        <div class="user-trigger" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameDisplay">Người dùng</span>
+          <span>▾</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div onclick="logout()">🚪 Đăng xuất</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Tổng quan</h1>
+        <p>Tổng quan, thống kê hệ thống và danh sách</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="label">Tổng số thuốc</div><div class="value" id="statThuoc">0</div></div>
+        <div class="stat-card"><div class="label">Tổng bệnh nhân</div><div class="value" id="statBenhNhan">0</div></div>
+        <div class="stat-card"><div class="label">Lượt khám hôm nay</div><div class="value" id="statLuotKham">0</div></div>
+        <div class="stat-card"><div class="label">Số cảnh báo hôm nay</div><div class="value" id="statCanhBao">0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Cảnh báo gần đây</div>
+        <table class="warn-table">
+          <thead><tr><th>Thời gian</th><th>Bệnh nhân</th><th>Tên thuốc</th><th>Mức độ</th></tr></thead>
+          <tbody id="warnTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://khanhhung.somee.com/api";
+
+function getUser() {
+  const raw = localStorage.getItem('medicheck_user');
+  return raw ? JSON.parse(raw) : null;
+}
+
+function getToken() {
+  return localStorage.getItem('medicheck_token') || '';
+}
+
+function authHeaders() {
+  const token = getToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+function checkAuth() {
+  if (!getToken()) {
+    window.location.href = 'login.html';
+  }
+}
+
+function renderUserInfo() {
+  const user = getUser();
+  if (!user) return;
+  document.getElementById('userNameDisplay').textContent = user.hoTen;
+  document.getElementById('userAvatar').textContent = user.hoTen.charAt(0).toUpperCase();
+}
+
+function toggleUserMenu() {
+  document.getElementById('userDropdown').classList.toggle('show');
+}
+
+function logout() {
+  localStorage.removeItem('medicheck_token');
+  localStorage.removeItem('medicheck_user');
+  window.location.href = 'login.html';
+}
+
+window.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) {
+    document.getElementById('userDropdown')?.classList.remove('show');
+  }
+});
+
+async function loadStats() {
+  const res = await fetch(`${API_BASE}/dashboard/stats`);
+  const data = await res.json();
+  document.getElementById('statThuoc').textContent = data.tongSoThuoc;
+  document.getElementById('statBenhNhan').textContent = data.tongBenhNhan;
+  document.getElementById('statLuotKham').textContent = data.luotKhamHomNay;
+  document.getElementById('statCanhBao').textContent = data.soCanhBao;
+}
+
+async function loadCanhBao() {
+  const res = await fetch(`${API_BASE}/dashboard/canh-bao-gan-day`);
+  const list = await res.json();
+
+  const tbody = document.getElementById('warnTableBody');
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Chưa có cảnh báo nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const badge = c.mucDo === 'NguyHiem' ? `<span class="badge-danger">⚠ Nguy hiểm</span>` : `<span class="badge-warn">⚠ Thận trọng</span>`;
+    const ngay = new Date(c.thoiGian).toLocaleString('vi-VN');
+    return `<tr><td>${ngay}</td><td>${c.tenBenhNhan}</td><td>${c.tenThuoc}</td><td>${badge}</td></tr>`;
+  }).join('');
+}
+
+checkAuth();
+renderUserInfo();
+loadStats();
+loadCanhBao();
+</script>
+</body>
+</html>
+
+
+
