@@ -8,6 +8,7 @@
   body, html { height:100%; }
   .container { display:flex; height:100vh; width:100%; }
 
+  /* PANEL TRÁI */
   .left-panel {
     flex: 0 0 38%;
     background: #16284d;
@@ -136,7 +137,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   const errorBox = document.getElementById('errorMsg');
 
   try {
-    const res = await fetch('https://localhost:5001/api/auth/login', {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ email: username, password: password })
@@ -146,9 +147,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
       return;
     }
     const data = await res.json();
-    if (data.token) localStorage.setItem('token', data.token);
-    console.log('Đăng nhập thành công', data);
-    window.location.href = "danh-muc-thuoc.html";
+    localStorage.setItem('medicheck_token', data.token);
+    localStorage.setItem('medicheck_user', JSON.stringify({ hoTen: data.hoTen, email: data.email, vaiTro: data.vaiTro }));
+    window.location.href = "dashboard.html";
   } catch (err) {
     errorBox.textContent = 'Không kết nối được tới server.';
     errorBox.style.display = 'block';
@@ -157,3 +158,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 </script>
 </body>
 </html>
+
+
+
+

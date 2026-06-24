@@ -119,9 +119,9 @@
 </div>
 
 <script>
-const API_BENHNHAN = "https://khanhhung.somee.com/api/benhnhan";
-const API_THUOC = "https://khanhhung.somee.com/api/thuoc";
-const API_DON = "https://khanhhung.somee.com/api/donkethuoc";
+const API_BENHNHAN = "http://localhost:5000/api/benhnhan";
+const API_THUOC = "http://localhost:5000/api/thuoc";
+const API_DON = "http://localhost:5000/api/donkethuoc";
 
 let lastDonId = null;
 let thuocOptionsHtml = '<option value="">Chọn thuốc...</option>';
@@ -216,6 +216,7 @@ loadThuocOptions().then(addThuocRow);
 </script>
 </body>
 </html>
+
 
 
 

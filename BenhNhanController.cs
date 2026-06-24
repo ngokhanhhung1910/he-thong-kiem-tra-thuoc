@@ -121,23 +121,24 @@ namespace MediCheck.Api.Controllers
             var benhNhan = await _context.BenhNhans.FindAsync(id);
             if (benhNhan == null) return NotFound("Không tìm thấy bệnh nhân.");
 
-            var list = await _context.DonThuocs
-                .Include(d => d.Thuoc)
+            var donList = await _context.DonKeThuocs
                 .Include(d => d.BacSiKe)
+                .Include(d => d.ChiTiets).ThenInclude(c => c.Thuoc)
                 .Where(d => d.BenhNhanId == id)
                 .OrderByDescending(d => d.NgayKe)
-                .Select(d => new DonThuocResponseDto
-                {
-                    Id = d.Id,
-                    NgayKe = d.NgayKe,
-                    TenThuoc = d.Thuoc.TenThuoc,
-                    TenBacSi = d.BacSiKe != null ? d.BacSiKe.HoTen : null,
-                    KetQuaKiemTra = d.KetQuaKiemTra.ToString(),
-                    GhiChu = d.GhiChu
-                })
                 .ToListAsync();
 
-            return Ok(list);
+            var result = donList.SelectMany(d => d.ChiTiets.Select(c => new DonThuocResponseDto
+            {
+                Id = c.Id,
+                NgayKe = d.NgayKe,
+                TenThuoc = c.Thuoc.TenThuoc,
+                TenBacSi = d.BacSiKe != null ? d.BacSiKe.HoTen : null,
+                KetQuaKiemTra = c.KetQuaKiemTra.ToString(),
+                GhiChu = c.LyDoCanhBao
+            })).ToList();
+
+            return Ok(result);
         }
     }
 }

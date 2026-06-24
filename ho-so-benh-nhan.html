@@ -14,8 +14,17 @@
   .sb-logo .text-main { font-size:15px; font-weight:600; }
   .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
   .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
-  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; text-decoration:none; }
   .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .user-menu { position:relative; }
+  .user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .user-avatar { width:30px; height:30px; border-radius:50%; background:#2f6fed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .user-dropdown { position:absolute; top:42px; right:0; background:#fff; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); min-width:160px; display:none; overflow:hidden; }
+  .user-dropdown.show { display:block; }
+  .user-dropdown div { padding:11px 16px; font-size:13px; cursor:pointer; color:#1f2533; }
+  .user-dropdown div:hover { background:#f4f6fa; }
 
   .main { flex:1; display:flex; flex-direction:column; }
   .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; }
@@ -44,6 +53,22 @@
   .badge-ok { color:#1e9e53; font-weight:600; }
   .badge-warn { color:#e08a1f; font-weight:600; }
   .empty-state { color:#8a93a6; font-size:13px; text-align:center; padding:40px 0; }
+
+  .btn-add { background:#2f6fed; color:#fff; border:none; padding:11px 18px; border-radius:8px; font-size:14px; cursor:pointer; }
+  .page-header-row { display:flex; justify-content:space-between; align-items:flex-start; }
+
+  .modal-overlay { position:fixed; inset:0; background:rgba(15,20,35,0.55); display:none; align-items:center; justify-content:center; z-index:100; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#eef0f5; border-radius:14px; padding:28px 32px; width:420px; }
+  .modal-box h2 { color:#2f6fed; font-size:18px; margin-bottom:14px; }
+  .form-row { margin-bottom:14px; }
+  .form-row label { display:block; font-size:13px; margin-bottom:6px; font-weight:500; }
+  .form-row input, .form-row select, .form-row textarea { width:100%; padding:11px 14px; border:1px solid #d8dbe3; border-radius:8px; font-size:13px; background:#fff; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .btn-cancel { padding:11px 20px; border-radius:8px; border:1px solid #d8dbe3; background:#fff; cursor:pointer; font-size:13px; }
+  .btn-save { padding:11px 20px; border-radius:8px; border:none; background:#2f6fed; color:#fff; cursor:pointer; font-size:13px; }
+  .btn-delete-patient { background:#ffe7e7; color:#e0432f; border:none; padding:8px 14px; border-radius:8px; font-size:12px; cursor:pointer; margin-top:10px; }
+  .btn-edit-patient { background:#eef1f8; color:#2f6fed; border:none; padding:8px 14px; border-radius:8px; font-size:12px; cursor:pointer; margin-top:10px; margin-right:8px; }
 </style>
 </head>
 <body>
@@ -55,23 +80,38 @@
       <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
     </div>
     <div class="sb-group-title">TỔNG QUAN</div>
-    <div class="sb-item">📊 Tổng quan</div>
+    <a class="sb-item" href="dashboard.html">📊 Tổng quan</a>
     <div class="sb-group-title">NGHIỆP VỤ</div>
-    <div class="sb-item">💊 Danh mục thuốc</div>
-    <div class="sb-item">✅ Kiểm tra thuốc theo độ tuổi</div>
-    <div class="sb-item active">👥 Hồ sơ bệnh nhân</div>
+    <a class="sb-item" href="danh-muc-thuoc.html">💊 Danh mục thuốc</a>
+    <a class="sb-item" href="ke-don-thuoc.html">📝 Kê đơn thuốc</a>
+    <a class="sb-item" href="kiem-tra-thuoc.html">✅ Kiểm tra thuốc theo độ tuổi</a>
+    <a class="sb-item active" href="ho-so-benh-nhan.html">👥 Hồ sơ bệnh nhân</a>
     <div class="sb-group-title">QUẢN TRỊ</div>
-    <div class="sb-item">🛡 Tài khoản người dùng</div>
-    <div class="sb-item">🔑 Phân quyền</div>
-    <div class="sb-item" onclick="location.href='bao-cao-thong-ke.html'">📈 Báo cáo & thống kê</div>
+    <a class="sb-item" href="tai-khoan-nguoi-dung.html">🛡 Tài khoản người dùng</a>
+    <a class="sb-item" href="phan-quyen.html">🔑 Phân quyền</a>
   </div>
 
   <div class="main">
-    <div class="topbar">MediCheck / <b>Hồ sơ bệnh nhân</b></div>
+    <div class="topbar" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>MediCheck / <b>Hồ sơ bệnh nhân</b></div>
+      <div class="user-menu">
+        <div class="user-trigger" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameDisplay">Người dùng</span>
+          <span>▾</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div onclick="logout()">🚪 Đăng xuất</div>
+        </div>
+      </div>
+    </div>
     <div class="content">
-      <div class="page-header">
-        <h1>Quản lý hồ sơ bệnh nhân</h1>
-        <p>Nơi tìm kiếm thông tin bệnh nhân</p>
+      <div class="page-header-row">
+        <div class="page-header">
+          <h1>Quản lý hồ sơ bệnh nhân</h1>
+          <p>Nơi tìm kiếm thông tin bệnh nhân</p>
+        </div>
+        <button class="btn-add" onclick="openAddModal()">+ Thêm bệnh nhân</button>
       </div>
 
       <div class="grid">
@@ -91,10 +131,128 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="patientModalOverlay">
+  <div class="modal-box">
+    <h2 id="patientModalTitle">Thêm Bệnh Nhân Mới</h2>
+    <input type="hidden" id="patientEditId">
+
+    <div class="form-row">
+      <label>Họ và tên</label>
+      <input type="text" id="patientHoTen" placeholder="Nhập họ và tên">
+    </div>
+    <div class="form-row">
+      <label>Ngày sinh</label>
+      <input type="date" id="patientNgaySinh">
+    </div>
+    <div class="form-row">
+      <label>Giới tính</label>
+      <select id="patientGioiTinh">
+        <option value="Nam">Nam</option>
+        <option value="Nu">Nữ</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>CCCD</label>
+      <input type="text" id="patientCCCD" placeholder="Nhập số CCCD">
+    </div>
+    <div class="form-row">
+      <label>Tiền sử bệnh</label>
+      <textarea id="patientTienSuBenh" rows="3" placeholder="Ví dụ: Dị ứng Aspirin..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePatientModal()">Huỷ</button>
+      <button class="btn-save" onclick="savePatient()">Lưu</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_BASE = "http://localhost:5000/api/benhnhan";
 let selectedId = null;
 let searchTimer = null;
+
+function getToken() { return localStorage.getItem('medicheck_token') || ''; }
+function getUser() { const raw = localStorage.getItem('medicheck_user'); return raw ? JSON.parse(raw) : null; }
+function checkAuth() { if (!getToken()) window.location.href = 'login.html'; }
+function renderUserInfo() {
+  const u = getUser();
+  if (!u) return;
+  document.getElementById('userNameDisplay').textContent = u.hoTen;
+  document.getElementById('userAvatar').textContent = u.hoTen.charAt(0).toUpperCase();
+}
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+function logout() {
+  localStorage.removeItem('medicheck_token');
+  localStorage.removeItem('medicheck_user');
+  window.location.href = 'login.html';
+}
+window.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) document.getElementById('userDropdown')?.classList.remove('show');
+});
+checkAuth();
+renderUserInfo();
+
+function authHeaders() { const t = getToken(); return t ? { 'Authorization': `Bearer ${t}` } : {}; }
+
+function openAddModal() {
+  document.getElementById('patientModalTitle').textContent = 'Thêm Bệnh Nhân Mới';
+  document.getElementById('patientEditId').value = '';
+  document.getElementById('patientHoTen').value = '';
+  document.getElementById('patientNgaySinh').value = '';
+  document.getElementById('patientGioiTinh').value = 'Nam';
+  document.getElementById('patientCCCD').value = '';
+  document.getElementById('patientTienSuBenh').value = '';
+  document.getElementById('patientModalOverlay').classList.add('show');
+}
+
+function openEditModal(p) {
+  document.getElementById('patientModalTitle').textContent = 'Sửa Hồ Sơ Bệnh Nhân';
+  document.getElementById('patientEditId').value = p.id;
+  document.getElementById('patientHoTen').value = p.hoTen;
+  document.getElementById('patientNgaySinh').value = p.ngaySinh.split('T')[0];
+  document.getElementById('patientGioiTinh').value = p.gioiTinh;
+  document.getElementById('patientCCCD').value = p.cccd || '';
+  document.getElementById('patientTienSuBenh').value = p.tienSuBenh || '';
+  document.getElementById('patientModalOverlay').classList.add('show');
+}
+
+function closePatientModal() {
+  document.getElementById('patientModalOverlay').classList.remove('show');
+}
+
+async function savePatient() {
+  const id = document.getElementById('patientEditId').value;
+  const payload = {
+    hoTen: document.getElementById('patientHoTen').value,
+    ngaySinh: document.getElementById('patientNgaySinh').value,
+    gioiTinh: document.getElementById('patientGioiTinh').value,
+    cccd: document.getElementById('patientCCCD').value,
+    tienSuBenh: document.getElementById('patientTienSuBenh').value
+  };
+
+  const url = id ? `${API_BASE}/${id}` : API_BASE;
+  const method = id ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) { alert(await res.text()); return; }
+
+  closePatientModal();
+  loadPatientList();
+}
+
+async function deletePatient(id) {
+  if (!confirm('Bạn có chắc muốn xoá bệnh nhân này?')) return;
+  await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: authHeaders() });
+  selectedId = null;
+  document.getElementById('detailPanel').innerHTML = `<div class="empty-state">Chọn một bệnh nhân ở danh sách bên trái để xem chi tiết</div>`;
+  loadPatientList();
+}
 
 async function loadPatientList() {
   const q = document.getElementById('searchInput').value;
@@ -140,6 +298,8 @@ async function selectPatient(id) {
     <div class="detail-line"><b>Tuổi:</b> ${p.tuoi} tuổi | <b>Giới tính:</b> ${p.gioiTinh}</div>
     <div class="detail-line"><b>CCCD:</b> ${p.cccd || 'Chưa cập nhật'}</div>
     <div class="detail-line"><b>Tiền sử bệnh:</b> ${p.tienSuBenh || 'Không có'}</div>
+    <button class="btn-edit-patient" onclick='openEditModal(${JSON.stringify(p)})'>✏️ Sửa hồ sơ</button>
+    <button class="btn-delete-patient" onclick="deletePatient(${p.id})">🗑️ Xoá bệnh nhân</button>
     <div class="timeline-title">LỊCH SỬ KÊ ĐƠN & KIỂM TRA THUỐC</div>
     ${timelineHtml}
   `;
@@ -154,3 +314,7 @@ loadPatientList();
 </script>
 </body>
 </html>
+
+
+
+

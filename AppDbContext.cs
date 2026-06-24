@@ -143,6 +143,18 @@ namespace MediCheck.Api.Data
                 new VaiTroQuyen { VaiTroId = 3, QuyenId = 3 }, new VaiTroQuyen { VaiTroId = 3, QuyenId = 4 }
             );
 
+            modelBuilder.Entity<NguoiDung>().HasData(
+                new NguoiDung { Id = 1, HoTen = "Quản trị viên", Email = "admin@medicheck.com", PasswordHash = "$2b$11$SbZ5gOYejRWZvBm8eKlrOeJy7S/atGER.EoUob7x8uC7flq1AWsGa", VaiTro = VaiTro.Admin, TrangThai = TrangThaiTaiKhoan.HoatDong },
+                new NguoiDung { Id = 2, HoTen = "Bác sĩ Nguyễn An", Email = "bacsi@medicheck.com", PasswordHash = "$2b$11$.X61ltPWJLaNMyprtN9YZ.FNDkMOvU6OfKkmw3I27wEEcxVxC22Tu", VaiTro = VaiTro.BacSi, TrangThai = TrangThaiTaiKhoan.HoatDong },
+                new NguoiDung { Id = 3, HoTen = "Dược sĩ Trần Bình", Email = "duocsi@medicheck.com", PasswordHash = "$2b$11$TP1r5FPMtTIsFNNwEOoTau3bm.LfB3ErZ.50zNKw.p3gxPo30iaFq", VaiTro = VaiTro.DuocSi, TrangThai = TrangThaiTaiKhoan.HoatDong }
+            );
+
+            modelBuilder.Entity<BenhNhan>().HasData(
+                new BenhNhan { Id = 1, MaBenhNhan = "BN0001", HoTen = "Nguyễn Văn A", NgaySinh = new DateTime(2019, 3, 10), GioiTinh = GioiTinh.Nam, CCCD = "079200000001", TienSuBenh = "Dị ứng với thành phần Aspirin" },
+                new BenhNhan { Id = 2, MaBenhNhan = "BN0002", HoTen = "Trần Gia Bảo", NgaySinh = new DateTime(2011, 7, 22), GioiTinh = GioiTinh.Nam, CCCD = "079200000002", TienSuBenh = null },
+                new BenhNhan { Id = 3, MaBenhNhan = "BN0003", HoTen = "Lê Thị Mai", NgaySinh = new DateTime(1990, 1, 15), GioiTinh = GioiTinh.Nu, CCCD = "079200000003", TienSuBenh = "Tiền sử viêm gan" }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
     }

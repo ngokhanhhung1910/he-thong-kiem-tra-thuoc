@@ -14,11 +14,20 @@
   .sb-logo .text-main { font-size:15px; font-weight:600; }
   .sb-logo .text-sub { font-size:10px; color:#9fb0d6; }
   .sb-group-title { font-size:11px; color:#7f8bab; padding:14px 20px 6px; letter-spacing:0.5px; }
-  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; }
+  .sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:14px; color:#cdd6ec; cursor:pointer; text-decoration:none; }
   .sb-item.active { background:#2f6fed; color:#fff; border-radius:0 20px 20px 0; }
+  .sb-item:hover:not(.active) { background:#1f3461; }
+
+  .user-menu { position:relative; }
+  .user-trigger { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .user-avatar { width:30px; height:30px; border-radius:50%; background:#2f6fed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+  .user-dropdown { position:absolute; top:42px; right:0; background:#fff; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); min-width:160px; display:none; overflow:hidden; }
+  .user-dropdown.show { display:block; }
+  .user-dropdown div { padding:11px 16px; font-size:13px; cursor:pointer; color:#1f2533; }
+  .user-dropdown div:hover { background:#f4f6fa; }
 
   .main { flex:1; display:flex; flex-direction:column; }
-  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; }
+  .topbar { background:#fff; padding:14px 28px; font-size:13px; color:#8a93a6; border-bottom:1px solid #e8ebf1; display:flex; justify-content:space-between; align-items:center; }
   .topbar b { color:#2f6fed; }
   .content { padding:26px 28px; }
   .page-header h1 { font-size:24px; font-weight:600; }
@@ -48,19 +57,31 @@
       <div><div class="text-main">MediCheck</div><div class="text-sub">Hệ thống kiểm tra thuốc</div></div>
     </div>
     <div class="sb-group-title">TỔNG QUAN</div>
-    <div class="sb-item">📊 Tổng quan</div>
+    <a class="sb-item" href="dashboard.html">📊 Tổng quan</a>
     <div class="sb-group-title">NGHIỆP VỤ</div>
-    <div class="sb-item">💊 Danh mục thuốc</div>
-    <div class="sb-item">✅ Kiểm tra thuốc theo độ tuổi</div>
-    <div class="sb-item">👥 Hồ sơ bệnh nhân</div>
+    <a class="sb-item" href="danh-muc-thuoc.html">💊 Danh mục thuốc</a>
+    <a class="sb-item" href="ke-don-thuoc.html">📝 Kê đơn thuốc</a>
+    <a class="sb-item" href="kiem-tra-thuoc.html">✅ Kiểm tra thuốc theo độ tuổi</a>
+    <a class="sb-item" href="ho-so-benh-nhan.html">👥 Hồ sơ bệnh nhân</a>
     <div class="sb-group-title">QUẢN TRỊ</div>
-    <div class="sb-item">🛡 Tài khoản người dùng</div>
-    <div class="sb-item active">🔑 Phân quyền</div>
-    <div class="sb-item" onclick="location.href='bao-cao-thong-ke.html'">📈 Báo cáo & thống kê</div>
+    <a class="sb-item" href="tai-khoan-nguoi-dung.html">🛡 Tài khoản người dùng</a>
+    <a class="sb-item active" href="phan-quyen.html">🔑 Phân quyền</a>
   </div>
 
   <div class="main">
-    <div class="topbar">MediCheck / <b>Quản lý phân quyền</b></div>
+    <div class="topbar">
+      <div>MediCheck / <b>Quản lý phân quyền</b></div>
+      <div class="user-menu">
+        <div class="user-trigger" onclick="toggleUserMenu()">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userNameDisplay">Người dùng</span>
+          <span>▾</span>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <div onclick="logout()">🚪 Đăng xuất</div>
+        </div>
+      </div>
+    </div>
     <div class="content">
       <div class="page-header">
         <h1>Quản lý phân quyền</h1>
@@ -76,18 +97,35 @@
 </div>
 
 <script>
-const API_BASE = "http://localhost:5000/api/phan-quyen";
-const TOKEN = ""; 
+const API_BASE = "http://localhost:5000/api/auth/phanquyen";
+
+function getToken() { return localStorage.getItem('medicheck_token') || ''; }
+function getUser() { const raw = localStorage.getItem('medicheck_user'); return raw ? JSON.parse(raw) : null; }
+function authHeaders() { const t = getToken(); return t ? { 'Authorization': `Bearer ${t}` } : {}; }
+function checkAuth() { if (!getToken()) window.location.href = 'login.html'; }
+function renderUserInfo() {
+  const u = getUser();
+  if (!u) return;
+  document.getElementById('userNameDisplay').textContent = u.hoTen;
+  document.getElementById('userAvatar').textContent = u.hoTen.charAt(0).toUpperCase();
+}
+function toggleUserMenu() { document.getElementById('userDropdown').classList.toggle('show'); }
+function logout() {
+  localStorage.removeItem('medicheck_token');
+  localStorage.removeItem('medicheck_user');
+  window.location.href = 'login.html';
+}
+window.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) document.getElementById('userDropdown')?.classList.remove('show');
+});
 
 const roleBadgeClass = { "Admin": "role-admin", "BacSi": "role-bacsi", "DuocSi": "role-duocsi" };
 
 async function loadMatrix() {
-  const res = await fetch(`${API_BASE}/matrix`, {
-    headers: TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}
-  });
+  const res = await fetch(`${API_BASE}/matrix`, { headers: authHeaders() });
   if (!res.ok) {
     document.querySelector('#matrixTable tbody').innerHTML =
-      `<tr><td>Lỗi tải dữ liệu (${res.status}). Bạn cần đăng nhập với quyền Admin và dán token vào biến TOKEN trong file JS.</td></tr>`;
+      `<tr><td>Bạn không có quyền truy cập chức năng này (mã lỗi ${res.status}).</td></tr>`;
     return;
   }
   const data = await res.json();
@@ -97,11 +135,13 @@ async function loadMatrix() {
 function renderMatrix(data) {
   const table = document.getElementById('matrixTable');
 
+  // Header: Chức năng | Admin | Bác sĩ | Dược sĩ
   const thead = table.querySelector('thead');
   thead.innerHTML = `<tr><th>Chức năng</th>${
     data.vaiTros.map(v => `<th><span class="role-badge ${roleBadgeClass[v.tenVaiTro] || ''}">${v.tenVaiTro}</span></th>`).join('')
   }</tr>`;
 
+  // Body: mỗi dòng là 1 quyền, mỗi cột là checkbox cho từng vai trò
   const tbody = table.querySelector('tbody');
   tbody.innerHTML = data.quyens.map(q => `
     <tr>
@@ -117,10 +157,7 @@ function renderMatrix(data) {
 async function toggleQuyen(vaiTroId, quyenId, choPhep) {
   await fetch(`${API_BASE}/cap-nhat`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {})
-    },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify({ vaiTroId, quyenId, choPhep })
   });
   const status = document.getElementById('saveStatus');
@@ -128,7 +165,13 @@ async function toggleQuyen(vaiTroId, quyenId, choPhep) {
   setTimeout(() => status.classList.remove('show'), 1500);
 }
 
+checkAuth();
+renderUserInfo();
 loadMatrix();
 </script>
 </body>
 </html>
+
+
+
+
